@@ -20,7 +20,7 @@
 - uint votingCount;
 
 - uint averageTotal // could be privat?
-- unit averageCount // could be privat?
+- uint averageCount // could be privat?
 
 # Voting
 
