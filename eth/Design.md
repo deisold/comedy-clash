@@ -53,6 +53,7 @@ closeSubmissions()
 createVotingForSubmission(uint index, string voter, string comment, uint8 value)
 
 - checks if the submission window is still open
+- checks if the sender does not vote on his own submission
 - checks that the sender haven't voted yet on given submission
 - adds the voting to the submission 
 - updates average total and count
