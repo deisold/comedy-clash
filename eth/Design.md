@@ -9,6 +9,9 @@
 - closed
 
 - Array of Submission // Should be an array for ability to iterate
+- uint submissionCount
+
+- mapping of submissions to a mapping of their voters
 
 ## Submissions
 - address artist
@@ -31,7 +34,7 @@
 ## functions
 
 ### Comedy Clash open for submissions?
-IsOpenForSubmission()
+IsOpenForSubmission() // is this needed?
 
 ### Close the submission window
 closeSubmissions()
@@ -40,19 +43,16 @@ closeSubmissions()
 
 ### createSubmissions(string name, string topic, string preview)
 - checks if the submission window is still open:
-    - closed flag
     - we are still one day before the show. 
     - if the second is not the case, the closed flag will be set to true
       and a error event SubmissionFailedEvent emitted
     
 - creates a submission with given content and adds it to the list of submissions
 
-### submission count
-getSubmissionCount()
-
 ### Create new voting
 createVotingForSubmission(uint index, string voter, string comment, uint8 value)
 
+- checks if the submission window is still open
 - checks that the sender haven't voted yet on given submission
 - adds the voting to the submission 
 - updates average total and count

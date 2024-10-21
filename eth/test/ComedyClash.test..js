@@ -44,4 +44,24 @@ describe("ComedyClash", function () {
             expect(diff).to.equal(0);
         });
     });
+
+    describe("Create a new submission", async function () {
+        it("Should set values right and add to submission array", async function () {
+            const { comedyClash, owner } = await deploy("Test", 2);
+
+            const name = "Diego";
+            const topic = "Dating in Playa";
+            const preview = "Here we go!";
+
+            await comedyClash.createSubmissions(name, topic, preview);
+            expect(await comedyClash.submissionCount()).to.equal(1);
+
+            const newSubmission = await comedyClash.submissions(0);
+
+            expect(newSubmission.id).to.equal(1);
+            expect(newSubmission.artist).to.equal(owner);
+            expect(newSubmission.name).to.equal(name);
+            expect(newSubmission.preview).to.equal(preview);
+        });
+    });
 });
