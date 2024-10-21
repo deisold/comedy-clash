@@ -26,6 +26,13 @@ describe("ComedyClash", function () {
         return { comedyClash, blockTimeStamp, owner, otherAccount };
     }
 
+    async function createDefaultSubmissions(comedyClash) {
+        const [owner, secondAccount, thirdAccount] = await ethers.getSigners();
+
+        await comedyClash.connect(secondAccount).createSubmissions("Diego", "Dating in Playa", "Here we go!");
+        await comedyClash.connect(thirdAccount).createSubmissions("Ben", "Life is simple", "Yeaaaaah!");
+    }
+
     // Helper to wrap the fixture so loadFixture can use it properly
     function fixture(name, daysToFinish) {
         return async () => fixtureWithParams(name, daysToFinish);  // Returns a function
@@ -45,23 +52,100 @@ describe("ComedyClash", function () {
         });
     });
 
+    describe("Close the submission time frame", async function () {
+        it("Closing sumbission time frame throws error, since only permitted by manager", async function () {
+            const { comedyClash, otherAccount } = await deploy("Test", 2);
+
+            try {
+                await comedyClash.connect(otherAccount).closeSubmission();
+                expect(false)
+            } catch (error) {
+                expect(error);
+            }
+        });
+
+        it("Closing sumbission time frame if called by manager", async function () {
+            const { comedyClash, otherAccount } = await deploy("Test", 2);
+
+            await comedyClash.closeSubmission();
+            expect(await comedyClash.closed());
+        });
+
+    });
+
     describe("Create a new submission", async function () {
         it("Should set values right and add to submission array", async function () {
-            const { comedyClash, owner } = await deploy("Test", 2);
+            const { comedyClash, otherAccount } = await deploy("Test", 2);
 
             const name = "Diego";
             const topic = "Dating in Playa";
             const preview = "Here we go!";
 
-            await comedyClash.createSubmissions(name, topic, preview);
+            await comedyClash.connect(otherAccount).createSubmissions(name, topic, preview);
             expect(await comedyClash.submissionCount()).to.equal(1);
 
             const newSubmission = await comedyClash.submissions(0);
 
             expect(newSubmission.id).to.equal(1);
-            expect(newSubmission.artist).to.equal(owner);
+            expect(newSubmission.artist).to.equal(otherAccount);
             expect(newSubmission.name).to.equal(name);
             expect(newSubmission.preview).to.equal(preview);
         });
+
+        it("New submission is rejected when sumbission time frame is closed.", async function () {
+            const { comedyClash, otherAccount } = await deploy("Test", 2);
+
+            await comedyClash.closeSubmission();
+            expect(await comedyClash.closed());
+
+            try {
+                const name = "Diego";
+                const topic = "Dating in Playa";
+                const preview = "Here we go!";
+
+                await comedyClash.connect(otherAccount).createSubmissions(name, topic, preview);
+
+                expect(false)
+            } catch (error) {
+                expect(error);
+            }
+        });
+
+        it("New submission is rejected when sumbission time frame is over but submission not closed yet.", async function () {
+            const { comedyClash, otherAccount } = await deploy("Test", 2);
+
+            // Increase time by 3 days
+            await ethers.provider.send("evm_increaseTime", [3 * ONE_DAY_IN_SECS]); // 3 days in seconds
+            await ethers.provider.send("evm_mine"); // Mine a new block
+
+            try {
+                const name = "Diego";
+                const topic = "Dating in Playa";
+                const preview = "Here we go!";
+
+                await comedyClash.connect(otherAccount).createSubmissions(name, topic, preview);
+
+                expect(false)
+            } catch (error) {
+                expect(error);
+            }
+        });
     });
+
+    describe("Votings", async function () {
+
+        it("createVotingForSubmission", async function () {
+            const { comedyClash, otherAccount } = await deploy("Test for voting", 2);
+            await createDefaultSubmissions(comedyClash);
+
+            const signers = await ethers.getSigners();
+
+            const voterName = "Nick";
+            const voterComment = "Cool stuff";
+            const voterRating = 5;
+            await comedyClash.createVotingForSubmission(0, voterName, voterName, voterRating);
+        });
+
+    });
+
 });

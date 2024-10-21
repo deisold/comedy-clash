@@ -13,7 +13,7 @@ contract ComedyClash {
     Submission[] public submissions;
     uint public submissionCount;
 
-    // keep track of voters for a certain submission
+    // keep track of voters for a certain submission (index)
     mapping(uint => mapping(address => bool)) public submissionVoters;
 
     struct Submission {
@@ -50,7 +50,7 @@ contract ComedyClash {
         completionTimestamp = block.timestamp + _durationInDays * 1 days;
     }
 
-    function closeSubmissions() public onlyManager openForSubmission {
+    function closeSubmission() public onlyManager {
         closed = true;
     }
 
@@ -69,5 +69,24 @@ contract ComedyClash {
         newSubmission.name = _name;
         newSubmission.topic = _topic;
         newSubmission.preview = _preview;
+    }
+
+    function createVotingForSubmission(
+        uint index,
+        string memory _voter,
+        string memory _comment,
+        uint8 _value
+    ) public openForSubmission {
+        // exclude multiple votings of the same address on the same submission
+        require(!submissionVoters[index][msg.sender]);
+
+        Voting memory voting = Voting({
+            voter: _voter,
+            comment: _comment,
+            value: _value
+        });
+
+        submissions[index].votes.push(voting);
+        submissionVoters[index][msg.sender] = true;
     }
 }
