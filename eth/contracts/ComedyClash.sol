@@ -54,6 +54,7 @@ contract ComedyClash {
         closed = true;
     }
 
+    // Creates a new submission for the comdedy show
     function createSubmissions(
         string memory _name,
         string memory _topic,
@@ -71,12 +72,15 @@ contract ComedyClash {
         newSubmission.preview = _preview;
     }
 
+    // Creates a Voting for the submission at given index
     function createVotingForSubmission(
         uint index,
         string memory _voter,
         string memory _comment,
         uint8 _value
     ) public openForSubmission {
+        // no voting from the creator of the submission
+        require(submissions[index].artist != msg.sender);
         // exclude multiple votings of the same address on the same submission
         require(!submissionVoters[index][msg.sender]);
 
@@ -90,6 +94,7 @@ contract ComedyClash {
         submissionVoters[index][msg.sender] = true;
     }
 
+    // Retrieves the vote at given index for a submission at given index
     function getVoteForSubmission(uint indexSubmission, uint indexVote) public view returns (Voting memory){
         return submissions[indexSubmission].votes[indexVote];
     }

@@ -181,6 +181,26 @@ describe("ComedyClash", function () {
             }
 
         });
+        it("createVotingForSubmission not possible for the artist of submission", async function () {
+            const { comedyClash, secondAccount } = await deploy("Test for voting", 2);
+            await createDefaultSubmissions(comedyClash);
+
+            const submissionIndex = 0;
+            const voterName = "Nick";
+            const voterComment = "Cool stuff";
+            const voterRating = 5;
+
+            // secondAccount creates the submission at index 0
+            try {
+                await comedyClash
+                    .connect(secondAccount)
+                    .createVotingForSubmission(submissionIndex, voterName, voterComment, voterRating);
+                expect(false)
+            } catch (error) {
+                expect(error)
+            }
+
+        });
 
     });
 
