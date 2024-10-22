@@ -178,11 +178,11 @@ describe("ComedyClash", function () {
             sumbission = await comedyClash.submissions(submissionIndex);
             expect(sumbission).to.not.null;
 
-            const precision = Number(await comedyClash.precision());
+            const precision = Number(await comedyClash.PRECISION());
             expectedRating = 7 * precision / 2;
 
             expect(Number(sumbission.averageValue)).equals(expectedRating);
-   
+
 
             // test for 3 votings
             await comedyClash

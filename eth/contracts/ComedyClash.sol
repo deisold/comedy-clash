@@ -13,7 +13,7 @@ contract ComedyClash {
     Submission[] public submissions;
     uint public submissionCount;
 
-    uint public precision = 1e18; // 18 decimal places
+    uint public constant PRECISION = 1e18; // 18 decimal places
 
     // keep track of voters for a certain submission (index)
     mapping(uint => mapping(address => bool)) public submissionVoters;
@@ -101,7 +101,7 @@ contract ComedyClash {
         submission.averageTotal += _value;
         submission.averageCount++;
         submission.averageValue =
-            (submission.averageTotal * precision) /
+            (submission.averageTotal * PRECISION) /
             submission.averageCount;
     }
 
