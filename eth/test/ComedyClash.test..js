@@ -139,11 +139,47 @@ describe("ComedyClash", function () {
             await createDefaultSubmissions(comedyClash);
 
             const signers = await ethers.getSigners();
+            const voterAddress = signers[5];
 
+            const submissionIndex = 0;
             const voterName = "Nick";
             const voterComment = "Cool stuff";
             const voterRating = 5;
-            await comedyClash.createVotingForSubmission(0, voterName, voterName, voterRating);
+            await comedyClash
+                .connect(voterAddress)
+                .createVotingForSubmission(submissionIndex, voterName, voterComment, voterRating);
+
+            // test
+            const vote = await comedyClash.getVoteForSubmission(submissionIndex, 0);
+            
+            expect(vote).to.not.null;
+            expect(vote.voter).equals(voterName);
+            expect(vote.comment).equals(voterComment);
+            expect(vote.value).equals(BigInt(voterRating));
+
+        });
+
+        it("createVotingForSubmission not possible a second time", async function () {
+            const { comedyClash, otherAccount } = await deploy("Test for voting", 2);
+            await createDefaultSubmissions(comedyClash);
+
+            const signers = await ethers.getSigners();
+            const voterAddress = signers[5];
+
+            const submissionIndex = 0;
+            const voterName = "Nick";
+            const voterComment = "Cool stuff";
+            const voterRating = 5;
+
+            try {
+                await comedyClash
+                    .connect(voterAddress)
+                    .createVotingForSubmission(submissionIndex, voterName, voterComment, voterRating);
+                expect(false)
+            } catch (error) {
+                expect(error)
+            }
+
         });
 
     });

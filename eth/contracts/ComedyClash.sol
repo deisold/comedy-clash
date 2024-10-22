@@ -89,4 +89,8 @@ contract ComedyClash {
         submissions[index].votes.push(voting);
         submissionVoters[index][msg.sender] = true;
     }
+
+    function getVoteForSubmission(uint indexSubmission, uint indexVote) public view returns (Voting memory){
+        return submissions[indexSubmission].votes[indexVote];
+    }
 }
