@@ -13,6 +13,8 @@ contract ComedyClash {
     Submission[] public submissions;
     uint public submissionCount;
 
+    uint public precision = 1e18; // 18 decimal places
+
     // keep track of voters for a certain submission (index)
     mapping(uint => mapping(address => bool)) public submissionVoters;
 
@@ -25,6 +27,7 @@ contract ComedyClash {
         Voting[] votes;
         uint averageTotal;
         uint averageCount;
+        uint averageValue; // gets computed on every new vote
     }
 
     struct Voting {
@@ -79,8 +82,9 @@ contract ComedyClash {
         string memory _comment,
         uint8 _value
     ) public openForSubmission {
+        Submission storage submission = submissions[index];
         // no voting from the creator of the submission
-        require(submissions[index].artist != msg.sender);
+        require(submission.artist != msg.sender);
         // exclude multiple votings of the same address on the same submission
         require(!submissionVoters[index][msg.sender]);
 
@@ -90,12 +94,22 @@ contract ComedyClash {
             value: _value
         });
 
-        submissions[index].votes.push(voting);
+        submission.votes.push(voting);
         submissionVoters[index][msg.sender] = true;
+
+        // compute the average vote for the submission
+        submission.averageTotal += _value;
+        submission.averageCount++;
+        submission.averageValue =
+            (submission.averageTotal * precision) /
+            submission.averageCount;
     }
 
     // Retrieves the vote at given index for a submission at given index
-    function getVoteForSubmission(uint indexSubmission, uint indexVote) public view returns (Voting memory){
+    function getVoteForSubmission(
+        uint indexSubmission,
+        uint indexVote
+    ) public view returns (Voting memory) {
         return submissions[indexSubmission].votes[indexVote];
     }
 }

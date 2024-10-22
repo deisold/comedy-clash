@@ -151,11 +151,51 @@ describe("ComedyClash", function () {
 
             // test
             const vote = await comedyClash.getVoteForSubmission(submissionIndex, 0);
-            
+
             expect(vote).to.not.null;
             expect(vote.voter).equals(voterName);
             expect(vote.comment).equals(voterComment);
             expect(vote.value).equals(BigInt(voterRating));
+
+        });
+        it("createVotingForSubmission updates the rating", async function () {
+            const { comedyClash, otherAccount } = await deploy("Test for voting", 2);
+            await createDefaultSubmissions(comedyClash);
+
+            const signers = await ethers.getSigners();
+
+            const submissionIndex = 0;
+
+            await comedyClash
+                .connect(signers[3])
+                .createVotingForSubmission(submissionIndex, "Nick", "Cool stuff", 5);
+
+            await comedyClash
+                .connect(signers[4])
+                .createVotingForSubmission(submissionIndex, "Olaf", "Could be better", 2);
+
+            // test for 2 votings
+            sumbission = await comedyClash.submissions(submissionIndex);
+            expect(sumbission).to.not.null;
+
+            const precision = Number(await comedyClash.precision());
+            expectedRating = 7 * precision / 2;
+
+            expect(Number(sumbission.averageValue)).equals(expectedRating);
+   
+
+            // test for 3 votings
+            await comedyClash
+                .connect(signers[5])
+                .createVotingForSubmission(submissionIndex, "Beth", "pretty good", 4);
+
+            // test for 2 votings
+            sumbission = await comedyClash.submissions(submissionIndex);
+            expect(sumbission).to.not.null;
+
+            expectedRating = 11 * precision / 3;
+
+            expect(Number(sumbission.averageValue)).equals(expectedRating);
 
         });
 

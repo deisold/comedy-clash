@@ -57,9 +57,5 @@ createVotingForSubmission(uint index, string voter, string comment, uint8 value)
 - checks that the sender haven't voted yet on given submission
 - adds the voting to the submission 
 - updates average total and count
-
-### voting count for submission
-getVotingForSubmission(uint index) 
 - calculates the average voting for the given submission
-
 
