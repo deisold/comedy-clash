@@ -19,7 +19,7 @@ describe("ComedyClash", function () {
         const [owner, otherAccount] = await ethers.getSigners();
 
         const ComedyClash = await ethers.getContractFactory("ComedyClash");
-        const comedyClash = await ComedyClash.deploy(name, daysToFinish);
+        const comedyClash = await ComedyClash.deploy(owner, name, daysToFinish);
 
         const blockTimeStamp = await time.latest();
 

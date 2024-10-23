@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.27;
 
 // Uncomment this line to use console.log
@@ -47,8 +47,13 @@ contract ComedyClash {
         _;
     }
 
-    constructor(string memory _description, uint _durationInDays) {
-        manager = msg.sender;
+    // The owner/creater will be the factory, the manager the actual person running the theater
+    constructor(
+        address _manager,
+        string memory _description,
+        uint _durationInDays
+    ) {
+        manager = _manager;
         description = _description;
         completionTimestamp = block.timestamp + _durationInDays * 1 days;
     }
