@@ -11,7 +11,7 @@
   "description": "",
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox": "^5.0.0",
-    "hardhat": "^2.22.13"
+    "hardhat": "^2.22.14"
   },
   "dependencies": {
     "lodash": "^4.17.21"
