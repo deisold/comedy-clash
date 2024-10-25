@@ -1,6 +1,8 @@
-# Sample Hardhat Project
+# COMEDY CLASH Hardhat Project
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a Hardhat Ignition module that deploys that contract.
+npx hardhat run scripts/deploy.js --network sepolia
+
+ComedyTheater contract deployed on Sepolia at 0x907b77166997FD2f8b347301AD76A30ab11FD908
 
 Try running some of the following tasks:
 
