@@ -4,7 +4,6 @@
 import React from 'react';
 import ShowList from './components/shows/showlist'
 
-
 export default function Home() {
     return (
         <div>

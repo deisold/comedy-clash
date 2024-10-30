@@ -17,8 +17,7 @@ export default function Home() {
     const [data, setData] = useState(null);
 
     useEffect(() => {
-        const initializeComedyTheater = async () => {
-
+        const init = async () => {
             try {
                 const amount = await comedyTheaterRepo.getShowAmount();
                 console.log(`amount=${amount}`);
@@ -28,7 +27,7 @@ export default function Home() {
             }
         }
 
-        initializeComedyTheater();
+        init();
     }, []);
 
     return (
