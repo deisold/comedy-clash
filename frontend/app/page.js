@@ -1,17 +1,22 @@
 // import { getStaticProps } from "next/dist/build/templates/pages";
 
-
 import React from 'react';
 import ShowList from './components/shows/showlist'
+
+import { AppProvider } from './components/providers'
 
 export default function Home() {
     return (
         <div>
-            <h1>Welcome to the Comedy Clash</h1>
+            <main>
+                <h1>Welcome to the Comedy Clash</h1>
 
-            <div>
-                <ShowList />
-            </div>
+                <div>
+                    <AppProvider>
+                        <ShowList />
+                    </AppProvider>
+                </div>
+            </main>
         </div>
     );
 }
