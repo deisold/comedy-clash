@@ -5,17 +5,23 @@ import { useEffect, useState } from 'react';
 
 import { useAppContext } from '@/app/components/providers';
 
+import ShowListItem from '../showlistitem/showlistitem'
+
 export default function Home() {
     const { comedyTheaterRepo } = useAppContext();
+    const { comedyClashRepo } = useAppContext();
 
-    const [data, setData] = useState(null);
+    const [showAmount, setShowAmount] = useState(null);
 
     useEffect(() => {
         const init = async () => {
             try {
                 const amount = await comedyTheaterRepo.getShowAmount();
                 console.log(`amount=${amount}`);
-                setData(amount);
+                setShowAmount(amount);
+
+                // get all show details
+
             } catch (err) {
                 console.error(err);
             }
@@ -26,7 +32,11 @@ export default function Home() {
 
     return (
         <div>
-            <h2>The number of shows: {data}</h2>
+            <h2>The number of shows: {showAmount}</h2>
+            {Array.from({ length: showAmount }, (_, index) => (
+                <ShowListItem key={index} index={index} />
+            ))}
+
         </div>
     );
 }

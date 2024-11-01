@@ -13,7 +13,8 @@ export const ComedyTheaterAdapter = (web3Provider, address) => {
     }
 
     return {
-        getShowAmount: async () => (await getContract()).getShowAmount()
+        getShowAmount: async () => (await getContract()).getShowAmount(),
+        getShowAdress: async (index) => (await getContract()).shows(index),
 
     }
 }

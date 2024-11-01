@@ -1,8 +1,6 @@
 
 export const MockComedyTheaterAdapter = () => ({
-    getShowAmount: async () => {
-        return 1;
-    },
-
+    getShowAmount: async () => 5,
+    getShowAdress: async (index) => index,
 }
 )

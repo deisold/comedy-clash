@@ -1,7 +1,6 @@
 
 export const ComedyTheaterRepo = (comedyTheaterAdapter) => ({
-    getShowAmount: async () => {
-        return await comedyTheaterAdapter.getShowAmount();
-    }
+    getShowAmount: async () => comedyTheaterAdapter.getShowAmount(),
+    getShowAdress: async (index) => comedyTheaterAdapter.getShowAdress(index)
 }
 )
