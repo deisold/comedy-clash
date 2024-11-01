@@ -2,7 +2,8 @@
 
 "use client"
 
-import React, { createContext, useContext, useState, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { initWeb3Provider } from '../source/utils/web3';
 
 import { ComedyTheaterAdapter } from '../source/adapters/ComedyTheaterAdapter';
 import { MockComedyTheaterAdapter } from '../source/adapters/MockComedyTheaterAdapter';
@@ -15,13 +16,29 @@ const AppContext = createContext();
 
 // Step 2: Create a Provider Component
 export const AppProvider = ({ children }) => {
-
     const useMockData = JSON.parse(process.env.NEXT_PUBLIC_USE_MOCKDATA || false);
     console.log(`USE_MOCKDATA=${useMockData}`);
 
-    const comedyTheaterRepo = useMemo(() =>
-        ComedyTheaterRepo(useMockData ? MockComedyTheaterAdapter() :
-            ComedyTheaterAdapter(comedyTheaterAddress)), []);
+    const [initLoading, setInitLoading] = useState(true);
+    const [comedyTheaterRepo, setComedyTheaterRepo] = useState(null);
+
+    useEffect(() => {
+        const init = async () => {
+            setInitLoading(true);
+            const web3Provider = await initWeb3Provider();
+
+            setComedyTheaterRepo(ComedyTheaterRepo(useMockData ? MockComedyTheaterAdapter() :
+                ComedyTheaterAdapter(web3Provider, comedyTheaterAddress)));
+
+            setInitLoading(false);
+        };
+        init();
+    }, []);
+
+
+    // const comedyTheaterRepo = useMemo(() =>
+    //     ComedyTheaterRepo(useMockData ? MockComedyTheaterAdapter() :
+    //         ComedyTheaterAdapter(comedyTheaterAddress)), []);
 
     // Define the state you want to share
     // const [myState, setMyState] = useState("Initial State");
@@ -30,6 +47,10 @@ export const AppProvider = ({ children }) => {
     // const updateMyState = (newState) => {
     //     setMyState(newState);
     // };
+
+    if (initLoading) {
+        return <p>Loading...</p>; // Loading indicator
+    }
 
     return (
         <AppContext.Provider value={{ comedyTheaterRepo }}>

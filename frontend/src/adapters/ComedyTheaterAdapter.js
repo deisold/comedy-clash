@@ -1,26 +1,19 @@
 const ethers = require("ethers");
 import comedyTheaterJSON from "../utils/ComedyTheater.json"
-import { initWeb3Provider } from '../utils/web3';
 
-let contract;
+export const ComedyTheaterAdapter = (web3Provider, address) => {
+    let contract;
 
-async function initComedyTheaterAdapter(address) {
-    const providerInstance = await initWeb3Provider();
-    return new ethers.Contract(
-        address,
-        comedyTheaterJSON.abi,
-        providerInstance
-    );
-}
+    async function getContract() {
+        return contract || (contract = new ethers.Contract(
+            address,
+            comedyTheaterJSON.abi,
+            web3Provider
+        ));
+    }
 
-async function getContract(address) {
-    contract = contract || await initComedyTheaterAdapter(address);
-    return contract;
-}
+    return {
+        getShowAmount: async () => (await getContract()).getShowAmount()
 
-export const ComedyTheaterAdapter = (address) => ({
-    getShowAmount: async () => {
-        return await (await getContract(address)).getShowAmount();
     }
 }
-)
