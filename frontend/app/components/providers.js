@@ -9,6 +9,10 @@ import { ComedyTheaterAdapter } from '../source/adapters/ComedyTheaterAdapter';
 import { MockComedyTheaterAdapter } from '../source/adapters/MockComedyTheaterAdapter';
 import { ComedyTheaterRepo } from '../source/repositories/ComedyTheaterRepo'
 
+import { ComedyClashAdapter } from '../source/adapters/ComedyClashAdapter';
+import { MockComedyClashAdapter } from '../source/adapters/MockComedyClashAdapter';
+import { ComedyClashRepo } from '../source/repositories/ComedyClashRepo'
+
 const comedyTheaterAddress = "0x907b77166997FD2f8b347301AD76A30ab11FD908";
 
 // // Step 1: Create the Context
@@ -21,14 +25,20 @@ export const AppProvider = ({ children }) => {
 
     const [initLoading, setInitLoading] = useState(true);
     const [comedyTheaterRepo, setComedyTheaterRepo] = useState(null);
+    const [comedyClashRepo, setComedyClashRepo] = useState(null);
 
     useEffect(() => {
         const init = async () => {
             setInitLoading(true);
             const web3Provider = await initWeb3Provider();
 
-            setComedyTheaterRepo(ComedyTheaterRepo(useMockData ? MockComedyTheaterAdapter() :
-                ComedyTheaterAdapter(web3Provider, comedyTheaterAddress)));
+            setComedyTheaterRepo(
+                ComedyTheaterRepo(useMockData ? MockComedyTheaterAdapter() :
+                    ComedyTheaterAdapter(web3Provider, comedyTheaterAddress)));
+
+            setComedyClashRepo(
+                ComedyClashRepo(web3Provider, useMockData ? MockComedyClashAdapter :
+                    ComedyClashAdapter));
 
             setInitLoading(false);
         };
