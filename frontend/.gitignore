@@ -8,6 +8,10 @@
 .env
 .next
 
+# soft links
+/src/utils/ComedyClash.json
+/src/utils/ComedyTheater.json
+
 # testing
 /coverage
 
