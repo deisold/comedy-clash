@@ -45,25 +45,12 @@ export const AppProvider = ({ children }) => {
         init();
     }, []);
 
-
-    // const comedyTheaterRepo = useMemo(() =>
-    //     ComedyTheaterRepo(useMockData ? MockComedyTheaterAdapter() :
-    //         ComedyTheaterAdapter(comedyTheaterAddress)), []);
-
-    // Define the state you want to share
-    // const [myState, setMyState] = useState("Initial State");
-
-    // // Function to update the state
-    // const updateMyState = (newState) => {
-    //     setMyState(newState);
-    // };
-
     if (initLoading) {
         return <p>Loading...</p>; // Loading indicator
     }
 
     return (
-        <AppContext.Provider value={{ comedyTheaterRepo }}>
+        <AppContext.Provider value={{ comedyTheaterRepo, comedyClashRepo }}>
             {children}
         </AppContext.Provider>
     );

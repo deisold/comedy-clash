@@ -9,7 +9,7 @@ export const ComedyClashRepo = (web3Provider, comedyTheaterAdapterfabric) => {
 
     return {
         getDescription: async (address) => {
-            return await getAdapter(address).getDescription();
+            return (await getAdapter(address)).getDescription();
         }
     }
 }
