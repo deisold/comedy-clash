@@ -1,4 +1,4 @@
-// import { getStaticProps } from "next/dist/build/templates/pages";
+import 'semantic-ui-css/semantic.min.css';
 
 import React from 'react';
 import ShowList from './components/shows/showlist'
