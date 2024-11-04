@@ -5,13 +5,12 @@ import { useEffect, useState } from 'react';
 
 import { useAppContext } from '@/app/components/providers';
 import { Button } from 'semantic-ui-react';
-// import 'semantic-ui-css/semantic.min.css';
+import Link from 'next/link';
 
 import ShowListItem from '../showlistitem/showlistitem'
 
 export default function Home() {
     const { comedyTheaterRepo } = useAppContext();
-    const { comedyClashRepo } = useAppContext();
 
     const [showAmount, setShowAmount] = useState(null);
 
@@ -36,9 +35,11 @@ export default function Home() {
         <div>
             <div>
                 <h2>The number of shows: {showAmount}</h2>
-                <Button primary floated='right'>
-                    Add Show
-                </Button>
+                <Link href="/createShow" passHref>
+                    <Button primary floated='right'>
+                        Add Show
+                    </Button>
+                </Link>
             </div>
             <br />
             <table>
@@ -57,6 +58,6 @@ export default function Home() {
                 </tbody>
             </table>
 
-        </div>
+        </div >
     );
 }
