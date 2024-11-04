@@ -13,6 +13,8 @@ export const ComedyClashAdapter = (web3Provider, address) => {
     }
 
     return {
-        getDescription: async () => (await getContract()).description()
+        getDescription: async () => (await getContract()).description(),
+        isClosed: async () => (await getContract()).closed(),
+        getSubmissionCount: async () => (await getContract()).submissionCount(),
     }
 }

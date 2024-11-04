@@ -4,6 +4,8 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 
 import { useAppContext } from '@/app/components/providers';
+import { Button } from 'semantic-ui-react';
+// import 'semantic-ui-css/semantic.min.css';
 
 import ShowListItem from '../showlistitem/showlistitem'
 
@@ -32,10 +34,28 @@ export default function Home() {
 
     return (
         <div>
-            <h2>The number of shows: {showAmount}</h2>
-            {Array.from({ length: showAmount }, (_, index) => (
-                <ShowListItem key={index} index={index} />
-            ))}
+            <div>
+                <h2>The number of shows: {showAmount}</h2>
+                <Button primary floated='right'>
+                    Add Show
+                </Button>
+            </div>
+            <br />
+            <table>
+                <thead>
+                    <tr>
+                        <th>Number</th>
+                        <th>Description</th>
+                        <th>Submission Count</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {Array.from({ length: showAmount }, (_, index) => (
+                        <ShowListItem key={showAmount - 1 - index} index={showAmount - 1 - index} />
+                    ))}
+                </tbody>
+            </table>
 
         </div>
     );
