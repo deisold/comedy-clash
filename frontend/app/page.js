@@ -1,20 +1,16 @@
 import 'semantic-ui-css/semantic.min.css';
 
 import React from 'react';
-import ShowList from './components/shows/showlist'
+import Home from './components/shows/showlist'
 
-import { AppProvider } from './components/providers'
-
-export default function Home() {
+export default function App() {
     return (
         <div>
             <main>
                 <h1>Welcome to the Comedy Clash</h1>
 
                 <div>
-                    <AppProvider>
-                        <ShowList />
-                    </AppProvider>
+                    <Home />
                 </div>
             </main>
         </div>

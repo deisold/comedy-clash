@@ -1,3 +1,6 @@
+import React from 'react';
+
+import { AppProvider } from './components/providers'
 
 export const metadata = {
     title: "Create Next App",
@@ -8,7 +11,9 @@ export default function RootLayout({ children }) {
     return (
         <html lang="en">
             <body>
-                {children}˝
+                <AppProvider>
+                    {children}
+                </AppProvider>
             </body>
         </html>
     );
