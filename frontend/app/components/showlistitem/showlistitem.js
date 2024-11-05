@@ -5,10 +5,12 @@ import { useEffect, useState } from 'react';
 
 import { useAppContext } from '@/app/components/providers';
 import { Button } from 'semantic-ui-react';
+import { useRouter } from 'next/navigation';
 
 export default function ShowListItem({ index }) {
     const { comedyTheaterRepo } = useAppContext();
     const { comedyClashRepo } = useAppContext();
+    const router = useRouter();
 
     const [showDetails, setShowDetails] = useState({
         address: null,
@@ -43,13 +45,21 @@ export default function ShowListItem({ index }) {
         init();
     }, []);
 
+    const handleNavigate = () => {
+        console.log(`showDetails.address:${showDetails.address}`);
+        
+        router.push(`/showdetails/${showDetails.address}`);
+    };
+
     return (
         <tr >
             <td>{index}</td>
             <td>{showDetails.description}</td>
             <td>{showDetails.submissionCount}</td>
             <td>
-                <Button basic>
+                <Button basic
+                    disabled={showDetails.address == null}
+                    onClick={handleNavigate}>
                     Show
                 </Button>
             </td>
