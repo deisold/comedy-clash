@@ -15,6 +15,8 @@ export const ComedyTheaterAdapter = (web3Provider, address) => {
     return {
         getShowAmount: async () => (await getContract()).getShowAmount(),
         getShowAdress: async (index) => (await getContract()).shows(index),
-
+        addShow: async (description, durationInDays) => {
+            return (await getContract()).addShow(description, durationInDays);
+        },
     }
 }
