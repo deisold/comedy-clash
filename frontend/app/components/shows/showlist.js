@@ -1,18 +1,21 @@
 "use client"
 
-import React from 'react';
-import { useEffect, useState } from 'react';
-
+import React, { useEffect, useState } from 'react';
 import { useAppContext } from '@/app/components/providers';
 import { Button } from 'semantic-ui-react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 import ShowListItem from '../showlistitem/showlistitem'
 
 export default function Home() {
     const { comedyTheaterRepo } = useAppContext();
+    const router = useRouter();
 
     const [showAmount, setShowAmount] = useState(null);
+
+    const handleNavigate = () => {
+        router.push('/createshow'); // Replace with the path you want to navigate to
+    };
 
     useEffect(() => {
         const init = async () => {
@@ -35,11 +38,10 @@ export default function Home() {
         <div>
             <div>
                 <h2>The number of shows: {showAmount}</h2>
-                <Link href="/createShow" passHref>
-                    <Button primary floated='right'>
-                        Add Show
-                    </Button>
-                </Link>
+                <Button primary floated='right' onClick={handleNavigate}>
+                    Add Show
+                </Button>
+
             </div>
             <br />
             <table>
