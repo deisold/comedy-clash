@@ -8,8 +8,10 @@ export const ComedyClashRepo = (web3Provider, comedyTheaterAdapterfabric) => {
     }
 
     return {
+        getPrecision: async (address) => (await getAdapter(address)).getPrecision(),
         getDescription: async (address) => (await getAdapter(address)).getDescription(),
         isClosed: async (address) => (await getAdapter(address)).isClosed(),
         getSubmissionCount: async (address) => (await getAdapter(address)).getSubmissionCount(),
+        getSubmission: async (address, index) => (await getAdapter(address)).getSubmission(index),
     }
 }
