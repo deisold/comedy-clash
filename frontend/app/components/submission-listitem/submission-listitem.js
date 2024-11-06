@@ -1,3 +1,5 @@
+// frontend/app/components/submission-listitem/submission-listitem.js
+
 "use client"
 
 import React from 'react';
@@ -21,14 +23,14 @@ export default function SubmissionListItem({ address, index }) {
                 const precision = await comedyClashRepo.getPrecision();
                 const submission = await comedyClashRepo.getSubmission(address, index);
 
-                
+
                 const scaledValue = submission.averageValue * 100n; // Scaled for two decimals
                 const averageWithTwoDecimals = scaledValue / precision; // Divide by PRECISION to scale it back down
                 let result = (averageWithTwoDecimals / 100n).toString(); // First divide to remove the scaling
                 const remainder = averageWithTwoDecimals % 100n; // Get the remainder for the fractional part
                 if (remainder !== 0n) {
                     result += '.' + remainder.toString().padStart(2, '0'); // Append the fractional part with 2 decimals
-                  }                
+                }
 
                 setData({
                     loading: false,
@@ -52,24 +54,34 @@ export default function SubmissionListItem({ address, index }) {
 
     const handleNavigate = () => {
         console.log(`SubmissionListItem: submission address:${address}`);
-        
+
         // router.push(`/showdetails/${showDetails.address}`);
     };
 
-    return (
-        <tr >
-            <td>{data.name}</td>
-            <td>{data.topic}</td>
-            <td>{data.preview}</td>
-            <td>{data.averageCount}</td>
-            <td>{data.averageValue}</td>
-            <td>
-                <Button basic
-                    disabled={data.loading}
-                    onClick={handleNavigate}>
-                    Vote
-                </Button>
+    let content;
+
+    if (data.loading) {
+        content = <p>Loading...</p>;
+    } else if (error) {
+        content = <p>Error: {error.message}</p>;
+    } else {
+        content = (
+            <tr >
+                <td>{data.name}</td>
+                <td>{data.topic}</td>
+                <td>{data.preview}</td>
+                <td>{data.averageCount}</td>
+                <td>{data.averageValue}</td>
+                <td>
+                    <Button basic
+                        disabled={data.loading}
+                        onClick={handleNavigate}>
+                        Vote
+                    </Button>
                 </td>
-        </tr >
-    );
+            </tr >
+        );
+    }
+
+    return (content);
 }
