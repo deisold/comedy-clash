@@ -4,8 +4,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../../components/providers';
-import { FormInput, Form, Button } from 'semantic-ui-react';
+import { Container, Header, Button } from 'semantic-ui-react';
 import { useRouter, useParams } from 'next/navigation';
+
+import SubmissionListItem from '@/app/components/submission-listitem/submission-listitem'
 
 export default function ShowDetails() {
     const { comedyClashRepo } = useAppContext();
@@ -15,9 +17,10 @@ export default function ShowDetails() {
     const [details, setDetails] = useState({
         loading: false,
         description: '',
+        submissionCount: 0
     });
 
-    const {address} = useParams();
+    const { address } = useParams();
 
     useEffect(() => {
         const init = async () => {
@@ -25,11 +28,13 @@ export default function ShowDetails() {
 
             try {
                 const showDescription = await comedyClashRepo.getDescription(address);
-               console.log("ShowDetails: comedyClashRepo.getDescription done");
-               
+                const submissionCount = await comedyClashRepo.getSubmissionCount(address);
+                console.log("ShowDetails: comedyClashRepo.getDescription done");
+
                 setDetails({
                     loading: false,
                     description: showDescription,
+                    submissionCount: submissionCount,
                 });
             }
             catch (err) {
@@ -47,7 +52,27 @@ export default function ShowDetails() {
         content = <p>Error: {error.message}</p>;
     } else {
         content = (
-            <h3>Show: {details.description}</h3>
+            <div>
+                <h3>Show: {details.description}</h3>
+                <h4>Submissions: {details.submissionCount}</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Artist</th>
+                            <th>Topic</th>
+                            <th>Preview</th>
+                            <th>Votes #</th>
+                            <th>Average</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {Array.from({ length: details.submissionCount }, (_, index) => (
+                            <SubmissionListItem key={index} address={address} index={index} />
+                        ))}
+                    </tbody>
+                </table>
+            </div>
         );
     }
 
