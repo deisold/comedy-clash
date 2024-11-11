@@ -32,6 +32,9 @@ export const ComedyClashAdapter = (web3Provider, address) => {
                 averageCount: submission.averageCount,
                 averageValue: ethers.BigNumber.from(submission.averageValue),
             })
-        }
+        },
+
+        createVotingForSubmission: async (index, voterName, comment, value) =>
+            (await getContract()).createVotingForSubmission(index, voterName, comment, value),
     }
 }

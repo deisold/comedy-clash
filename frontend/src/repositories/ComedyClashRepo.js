@@ -13,5 +13,7 @@ export const ComedyClashRepo = (web3Provider, comedyTheaterAdapterfabric) => {
         isClosed: async (address) => (await getAdapter(address)).isClosed(),
         getSubmissionCount: async (address) => (await getAdapter(address)).getSubmissionCount(),
         getSubmission: async (address, index) => (await getAdapter(address)).getSubmission(index),
+        createVotingForSubmission: async (address, index, voterName, comment, value) =>
+            (await getAdapter(address)).createVotingForSubmission(index, voterName, comment, value),
     }
 }
