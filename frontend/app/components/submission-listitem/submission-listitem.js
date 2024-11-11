@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 
 import { useAppContext } from '@/app/components/providers';
 import { Button } from 'semantic-ui-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useParams } from 'next/navigation';
 
 export default function SubmissionListItem({ address, index }) {
     const { comedyClashRepo } = useAppContext();
@@ -15,6 +15,8 @@ export default function SubmissionListItem({ address, index }) {
 
     const [data, setData] = useState({});
     const [error, setError] = useState(null);
+
+    const { showAddress } = useParams();
 
     useEffect(() => {
         const init = async () => {
@@ -55,13 +57,13 @@ export default function SubmissionListItem({ address, index }) {
     const handleNavigate = () => {
         console.log(`SubmissionListItem: submission address:${address}`);
 
-        // router.push(`/showdetails/${showDetails.address}`);
+        router.push(`/showdetails/${showAddress}/createvoting/${address}`);
     };
 
     let content;
 
     if (data.loading) {
-        content = <p>Loading...</p>;
+        content = <tr ><p>Loading...</p></tr>;
     } else if (error) {
         content = <p>Error: {error.message}</p>;
     } else {
