@@ -2,7 +2,7 @@
 
 "use client"
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAppContext } from '@/app/components/providers'
 import { FormInput, Form, Button } from 'semantic-ui-react';
 import { useRouter, useParams } from 'next/navigation';
@@ -11,18 +11,30 @@ export default function CreateVoting() {
     const { comedyClashRepo } = useAppContext();
     const router = useRouter();
 
-    const { showAddress, submissionAddress } = useParams();
+    const { showAddress, submissionIndex } = useParams();
 
+    const [name, setName] = useState('');
     const [comment, setComment] = useState('');
     const [value, setValue] = useState('');
 
     const [loading, setLoading] = useState(false);
     // State for validation errors
     const [errors, setErrors] = useState({
+        name: '',
         comment: '',
         value: '',
     });
     const [submitted, setSubmitted] = useState(false);
+
+    const [successMessage, setSuccessMessage] = useState('');
+
+    const onChangeName = (e) => {
+        setName(e.target.value)
+        if (errors.name) {
+            setErrors((prevErrors) => ({ ...prevErrors, name: '' }));
+            setSubmitted(false);
+        }
+    }
 
     const onChangeComment = (e) => {
         setComment(e.target.value)
@@ -42,6 +54,7 @@ export default function CreateVoting() {
 
     const validate = () => {
         const newErrors = {};
+        if (!name) newErrors.name = 'Please enter your name';
         if (!comment) newErrors.comment = 'Please enter a comment';
         if (!value) {
             newErrors.value = 'Please enter a value';
@@ -61,13 +74,19 @@ export default function CreateVoting() {
             console.log('Form submitted with:', { comment, value });
 
             setLoading(true)
+
+            await comedyClashRepo.createVotingForSubmission(
+                showAddress, submissionIndex, name, comment, value
+            );
             // await comedyTheaterRepo.addShow(description, days)
             setLoading(false)
-
-            router.back();
+            setSuccessMessage('Voting successfully sent.');
         }
     };
 
+    const handleBack = async () => {
+        router.back();
+    }
 
     return (
         <div>
@@ -76,7 +95,17 @@ export default function CreateVoting() {
             <br />
             <Form>
                 <FormInput
-                    error={submitted && errors.comment ? { content: errors.comment, pointing: 'below' } : null}
+                    error={submitted && errors.name ? { content: errors.name, pointing: 'below' } : null}
+                    fluid
+                    label='Name'
+                    placeholder='Whats your name?'
+                    id='form-input-name'
+                    type='text'
+                    value={name}
+                    onChange={onChangeName}
+                />
+                <FormInput
+                    error={submitted && errors.comment ? { content: errors.comment } : null}
                     fluid
                     label='Comment'
                     placeholder='Whats your comment?'
@@ -94,13 +123,26 @@ export default function CreateVoting() {
                     value={value}
                     onChange={onChangeValue}
                 />
-                <Button
-                    loading={loading}
-                    disabled={loading}
-                    onClick={handleSubmit}>
-                    Submit
-                </Button>
+                {!successMessage &&
+                    <Button
+                        loading={loading}
+                        disabled={loading || successMessage}
+                        onClick={handleSubmit}>
+                        Submit
+                    </Button>
+                }
             </Form>
+
+            {successMessage &&
+                <div>
+                    <br />
+                    <p>{successMessage}</p>
+                    <Button
+                        primary
+                        onClick={handleBack}>
+                        Back
+                    </Button>
+                </div>}
         </div>
     );
 }
