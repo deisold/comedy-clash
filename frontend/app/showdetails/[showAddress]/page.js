@@ -3,7 +3,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { useAppContext } from '../../components/providers';
+import { useAppContext } from '@/app/components/providers'
 import { Container, Header, Button } from 'semantic-ui-react';
 import { useRouter, useParams } from 'next/navigation';
 
@@ -20,15 +20,15 @@ export default function ShowDetails() {
         submissionCount: 0
     });
 
-    const { address } = useParams();
+    const { showAddress } = useParams();
 
     useEffect(() => {
         const init = async () => {
             setDetails(prevState => ({ ...prevState, loading: true }));
 
             try {
-                const showDescription = await comedyClashRepo.getDescription(address);
-                const submissionCount = await comedyClashRepo.getSubmissionCount(address);
+                const showDescription = await comedyClashRepo.getDescription(showAddress);
+                const submissionCount = await comedyClashRepo.getSubmissionCount(showAddress);
                 console.log("ShowDetails: comedyClashRepo.getDescription done");
 
                 setDetails({
@@ -68,7 +68,7 @@ export default function ShowDetails() {
                     </thead>
                     <tbody>
                         {Array.from({ length: details.submissionCount }, (_, index) => (
-                            <SubmissionListItem key={index} address={address} index={index} />
+                            <SubmissionListItem key={index} address={showAddress} index={index} />
                         ))}
                     </tbody>
                 </table>
