@@ -1,6 +1,8 @@
 import React from 'react';
 
 import { AppProvider } from './components/providers'
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export const metadata = {
     title: "Create Next App",
@@ -14,6 +16,13 @@ export default function RootLayout({ children }) {
                 <AppProvider>
                     {children}
                 </AppProvider>
+                <ToastContainer
+                    position="top-right"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    closeOnClick
+                    pauseOnHover
+                />
             </body>
         </html>
     );
