@@ -7,7 +7,6 @@ import { useAppContext } from '@/app/components/providers'
 import { FormInput, Form, Button } from 'semantic-ui-react';
 import { useRouter, useParams } from 'next/navigation';
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 export default function CreateVoting() {
     const { comedyClashRepo } = useAppContext();
@@ -79,25 +78,35 @@ export default function CreateVoting() {
     };
 
     const handleSubmit = async () => {
-        setSubmitted(true); // Indicate that the form was submitted
+        setSubmitted(true);
         if (validate()) {
-            console.log('Form submitted with:', { comment, value });
-
-            setLoading(true)
-
+            const controller = new AbortController();
+            
             try {
+                setLoading(true);
+                setErrorMessage('');
+                
                 await comedyClashRepo.createVotingForSubmission(
                     showAddress, submissionIndex, name, comment, value
                 );
+                
+                if (controller.signal.aborted) return;
+                
                 setSuccessMessage('Voting successfully sent.');
                 toast.success('Voting successfully sent!');
             } catch (error) {
+                if (controller.signal.aborted) return;
+                
                 console.error('Error creating voting:', error);
                 toast.error(error.message || 'Failed to submit voting. Please try again.');
                 setErrorMessage(error.message || 'Failed to submit voting. Please try again.');
             } finally {
-                setLoading(false);
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                }
             }
+
+            return () => controller.abort();
         }
     };
 

@@ -4,8 +4,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/app/components/providers'
-import { Container, Header, Button } from 'semantic-ui-react';
+import { Button } from 'semantic-ui-react';
 import { useRouter, useParams } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 import SubmissionListItem from '@/app/components/submission-listitem/submission-listitem'
 
@@ -13,6 +14,7 @@ export default function ShowDetails() {
     const { comedyClashRepo } = useAppContext();
     const router = useRouter();
 
+    const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [details, setDetails] = useState({
         loading: false,
@@ -23,33 +25,56 @@ export default function ShowDetails() {
     const { showAddress } = useParams();
 
     useEffect(() => {
-        const init = async () => {
-            setDetails(prevState => ({ ...prevState, loading: true }));
+        const controller = new AbortController();
 
+        const init = async () => {
             try {
+                setLoading(true);
+                setError('');
+
                 const showDescription = await comedyClashRepo.getDescription(showAddress);
+
+                if (controller.signal.aborted) return;
                 const submissionCount = await comedyClashRepo.getSubmissionCount(showAddress);
-                console.log("ShowDetails: comedyClashRepo.getDescription done");
+
+                if (controller.signal.aborted) return;
 
                 setDetails({
-                    loading: false,
                     description: showDescription,
                     submissionCount: submissionCount,
                 });
             }
             catch (err) {
-                setError(err);
+                if (controller.signal.aborted) return;
+
+                setError(err.message || 'Failed to load show details');
+                toast.error(err.message || 'Failed to load show details');
+            }
+            finally {
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                }
             }
         }
+
         init();
-    }, []);
+
+        return () => controller.abort();
+    }, [comedyClashRepo, showAddress]);
 
     let content;
 
-    if (details.loading) {
+    if (loading) {
         content = <p>Loading...</p>;
     } else if (error) {
-        content = <p>Error: {error.message}</p>;
+        content = (
+            <div className="error-container">
+                <p className="text-red-600">Error: {error}</p>
+                <Button onClick={() => window.location.reload()}>
+                    Try Again
+                </Button>
+            </div>
+        );
     } else {
         content = (
             <div>
