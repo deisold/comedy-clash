@@ -6,22 +6,24 @@ import React, { useState } from 'react';
 import { useAppContext } from '../components/providers';
 import { FormInput, Form, Button } from 'semantic-ui-react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-toastify';
 
 export default function CreateShow() {
     const { comedyTheaterRepo } = useAppContext();
-    const router = useRouter(); 
+    const router = useRouter();
 
     const [description, setDescription] = useState('');
     const [days, setDays] = useState('');
 
     const [loading, setLoading] = useState(false);
-    // State for validation errors
+    const [errorMessage, setErrorMessage] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+
     const [errors, setErrors] = useState({
         description: '',
         days: ''
     });
 
-    // State to control validation display
     const [submitted, setSubmitted] = useState(false);
 
     const onChangeDescription = (e) => {
@@ -51,7 +53,7 @@ export default function CreateShow() {
             newErrors.days = 'Please enter a valid whole number';
         } else if (daysNum < 1) {
             newErrors.days = 'At least 1 day is required';
-        } else if (daysNum > 30) { 
+        } else if (daysNum > 30) {
             newErrors.days = 'Maximum 30 days allowed';
         }
         setErrors(newErrors);
@@ -59,16 +61,38 @@ export default function CreateShow() {
     };
 
     const handleSubmit = async () => {
-        setSubmitted(true); // Indicate that the form was submitted
+        setSubmitted(true);
         if (validate()) {
-            console.log('Form submitted with:', { description, days });
-            
-            setLoading(true)
-            await comedyTheaterRepo.addShow(description, days)
-            setLoading(false)
+            const controller = new AbortController();
 
-            router.back();
+            try {
+                setLoading(true);
+                setErrorMessage('');
+
+                await comedyTheaterRepo.addShow(description, days);
+
+                if (controller.signal.aborted) return;
+
+                setSuccessMessage('Show successfully created!');
+                toast.success('Show successfully created!');
+            } catch (error) {
+                if (controller.signal.aborted) return;
+
+                console.error('Error creating show:', error);
+                toast.error(error.message || 'Failed to create show. Please try again.');
+                setErrorMessage(error.message || 'Failed to create show. Please try again.');
+            } finally {
+                if (!controller.signal.aborted) {
+                    setLoading(false);
+                }
+            }
+
+            return () => controller.abort();
         }
+    };
+
+    const handleBack = () => {
+        router.back();
     };
 
     return (
@@ -77,9 +101,10 @@ export default function CreateShow() {
                 <h1 className="text-2xl font-bold mb-2">Comedy Clash</h1>
                 <h3 className="text-xl">Create a new show</h3>
             </header>
+
             <Form className="space-y-4">
                 <FormInput
-                    disabled={loading}
+                    disabled={loading || successMessage}
                     error={submitted && errors.description ? { content: errors.description, pointing: 'below' } : null}
                     fluid
                     label='Description'
@@ -90,7 +115,7 @@ export default function CreateShow() {
                     onChange={onChangeDescription}
                 />
                 <FormInput
-                    disabled={loading}
+                    disabled={loading || successMessage}
                     error={submitted && errors.days ? { content: errors.days } : null}
                     fluid
                     label='Submission window'
@@ -99,13 +124,34 @@ export default function CreateShow() {
                     value={days}
                     onChange={onChangeDays}
                 />
-                <Button
-                    loading={loading}
-                    disabled={loading}
-                    onClick={handleSubmit}>
-                    Submit
-                </Button>
+                {!successMessage &&
+                    <Button
+                        loading={loading}
+                        disabled={loading || successMessage}
+                        onClick={handleSubmit}>
+                        Submit
+                    </Button>
+                }
             </Form>
+
+            {successMessage &&
+                <div>
+                    <br />
+                    <div className="success-message text-green-600 mt-4">
+                        {successMessage}
+                    </div>
+                    <Button
+                        primary
+                        onClick={handleBack}>
+                        Back
+                    </Button>
+                </div>}
+
+            {errorMessage && (
+                <div className="error-message text-red-600 mb-4">
+                    {errorMessage}
+                </div>
+            )}
         </div>
     );
 }
