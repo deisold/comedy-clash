@@ -2,6 +2,9 @@
 export const MockComedyClashAdapter = (web3Provider, address) => {
     let submissions = 3;
 
+    const delay = (ms) => {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    };
     return ({
         getPrecision: async () => BigInt(10n ** 18n),
         getDescription: async () => "Desc-" + address,
@@ -19,7 +22,10 @@ export const MockComedyClashAdapter = (web3Provider, address) => {
             averageCount: index + 10,
             averageValue: BigInt("4560000000000000000"),
         }),
-        createVotingForSubmission: async (index, voterName, comment, value) => { submissions++ },
+        createVotingForSubmission: async (index, voterName, comment, value) => {
+            await delay(1000);
+            submissions++
+        },
 
     })
 }
