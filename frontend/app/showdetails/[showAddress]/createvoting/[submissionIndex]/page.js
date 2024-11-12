@@ -6,6 +6,8 @@ import React, { useState } from 'react';
 import { useAppContext } from '@/app/components/providers'
 import { FormInput, Form, Button } from 'semantic-ui-react';
 import { useRouter, useParams } from 'next/navigation';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 export default function CreateVoting() {
     const { comedyClashRepo } = useAppContext();
@@ -28,8 +30,12 @@ export default function CreateVoting() {
 
     const [successMessage, setSuccessMessage] = useState('');
 
+    const [errorMessage, setErrorMessage] = useState('');
+
     const onChangeName = (e) => {
         setName(e.target.value)
+        setErrorMessage('')
+
         if (errors.name) {
             setErrors((prevErrors) => ({ ...prevErrors, name: '' }));
             setSubmitted(false);
@@ -38,6 +44,8 @@ export default function CreateVoting() {
 
     const onChangeComment = (e) => {
         setComment(e.target.value)
+        setErrorMessage('')
+
         if (errors.comment) {
             setErrors((prevErrors) => ({ ...prevErrors, comment: '' }));
             setSubmitted(false);
@@ -46,6 +54,8 @@ export default function CreateVoting() {
 
     const onChangeValue = (e) => {
         setValue(e.target.value)
+        setErrorMessage('')
+
         if (errors.value) {
             setErrors((prevErrors) => ({ ...prevErrors, value: '' }));
             setSubmitted(false);
@@ -75,12 +85,19 @@ export default function CreateVoting() {
 
             setLoading(true)
 
-            await comedyClashRepo.createVotingForSubmission(
-                showAddress, submissionIndex, name, comment, value
-            );
-            // await comedyTheaterRepo.addShow(description, days)
-            setLoading(false)
-            setSuccessMessage('Voting successfully sent.');
+            try {
+                await comedyClashRepo.createVotingForSubmission(
+                    showAddress, submissionIndex, name, comment, value
+                );
+                setSuccessMessage('Voting successfully sent.');
+                toast.success('Voting successfully sent!');
+            } catch (error) {
+                console.error('Error creating voting:', error);
+                toast.error(error.message || 'Failed to submit voting. Please try again.');
+                setErrorMessage(error.message || 'Failed to submit voting. Please try again.');
+            } finally {
+                setLoading(false);
+            }
         }
     };
 
@@ -143,6 +160,12 @@ export default function CreateVoting() {
                         Back
                     </Button>
                 </div>}
+            {/* Show inline error if present */}
+            {errorMessage && (
+                <div className="error-message text-red-600 mb-4">
+                    {errorMessage}
+                </div>
+            )}
         </div>
     );
 }
