@@ -13,7 +13,7 @@ export default function SubmissionListItem({ address, index }) {
     const { comedyClashRepo } = useAppContext();
     const router = useRouter();
 
-    const [data, setData] = useState({});
+    const [data, setData] = useState({ loading: true });
     const [error, setError] = useState(null);
 
     const { showAddress } = useParams();
@@ -24,7 +24,6 @@ export default function SubmissionListItem({ address, index }) {
                 setData({ loading: true });
                 const precision = await comedyClashRepo.getPrecision();
                 const submission = await comedyClashRepo.getSubmission(address, index);
-
 
                 const scaledValue = submission.averageValue * 100n; // Scaled for two decimals
                 const averageWithTwoDecimals = scaledValue / precision; // Divide by PRECISION to scale it back down
@@ -52,20 +51,20 @@ export default function SubmissionListItem({ address, index }) {
         }
 
         init();
-    }, []);
+    }, [comedyClashRepo, address, index]);
 
     const handleNavigate = () => {
         console.log(`SubmissionListItem: submission address:${address}`);
-
+        
         router.push(`/showdetails/${showAddress}/createvoting/${address}`);
     };
 
     let content;
 
     if (data.loading) {
-        content = <tr ><p>Loading...</p></tr>;
+        content = <tr><td>Loading...</td></tr>;
     } else if (error) {
-        content = <p>Error: {error.message}</p>;
+        content = <tr><td>Error: {error.message}</td></tr>;
     } else {
         content = (
             <tr >

@@ -7,7 +7,7 @@ import { useAppContext } from '../components/providers';
 import { FormInput, Form, Button } from 'semantic-ui-react';
 import { useRouter } from 'next/navigation';
 
-export default function createShow() {
+export default function CreateShow() {
     const { comedyTheaterRepo } = useAppContext();
     const router = useRouter(); 
 
@@ -41,15 +41,21 @@ export default function createShow() {
 
     const validate = () => {
         const newErrors = {};
-        if (!description) newErrors.description = 'Please enter a description';
+        if (!description.trim()) {
+            newErrors.description = 'Please enter a description';
+        }
+        const daysNum = Number(days);
         if (!days) {
             newErrors.days = 'Please enter the submission window in days';
-        } else if (days < 1) {
-            newErrors.days = 'At least 1 days';
+        } else if (isNaN(daysNum) || !Number.isInteger(daysNum)) {
+            newErrors.days = 'Please enter a valid whole number';
+        } else if (daysNum < 1) {
+            newErrors.days = 'At least 1 day is required';
+        } else if (daysNum > 30) { 
+            newErrors.days = 'Maximum 30 days allowed';
         }
         setErrors(newErrors);
-
-        return Object.keys(newErrors).length === 0; // Returns true if no errors
+        return Object.keys(newErrors).length === 0;
     };
 
     const handleSubmit = async () => {
@@ -66,37 +72,40 @@ export default function createShow() {
     };
 
     return (
-        <div>
-                <h1>Comedy Clash</h1>
-                <h3>Create a new show</h3>
-                <br />
-                <Form>
-                    <FormInput
-                        error={submitted && errors.description ? { content: errors.description, pointing: 'below' } : null}
-                        fluid
-                        label='Description'
-                        placeholder='How you wanna call the show?'
-                        id='form-input-description'
-                        type='text'
-                        value={description}
-                        onChange={onChangeDescription}
-                    />
-                    <FormInput
-                        error={submitted && errors.days ? { content: errors.days } : null}
-                        fluid
-                        label='Submission window'
-                        placeholder='How many days?'
-                        type='number'
-                        value={days}
-                        onChange={onChangeDays}
-                    />
-                    <Button
-                        loading={loading}
-                        disabled={loading}
-                        onClick={handleSubmit}>
-                        Submit
-                    </Button>
-                </Form>
+        <div className="container mx-auto p-4 max-w-md">
+            <header className="text-center mb-6">
+                <h1 className="text-2xl font-bold mb-2">Comedy Clash</h1>
+                <h3 className="text-xl">Create a new show</h3>
+            </header>
+            <Form className="space-y-4">
+                <FormInput
+                    disabled={loading}
+                    error={submitted && errors.description ? { content: errors.description, pointing: 'below' } : null}
+                    fluid
+                    label='Description'
+                    placeholder='How you wanna call the show?'
+                    id='form-input-description'
+                    type='text'
+                    value={description}
+                    onChange={onChangeDescription}
+                />
+                <FormInput
+                    disabled={loading}
+                    error={submitted && errors.days ? { content: errors.days } : null}
+                    fluid
+                    label='Submission window'
+                    placeholder='How many days?'
+                    type='number'
+                    value={days}
+                    onChange={onChangeDays}
+                />
+                <Button
+                    loading={loading}
+                    disabled={loading}
+                    onClick={handleSubmit}>
+                    Submit
+                </Button>
+            </Form>
         </div>
     );
 }
