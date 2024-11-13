@@ -11,6 +11,7 @@ export const MockComedyTheaterAdapter = () => {
         addShow: async (description, durationInDays) => {
             await delay(1000);
             amount++;
-        }
+        },
+        isManager: async () => true,
     }
 }

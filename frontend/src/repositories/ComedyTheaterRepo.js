@@ -4,5 +4,6 @@ export const ComedyTheaterRepo = (comedyTheaterAdapter) => ({
     getShowAdress: async (index) => comedyTheaterAdapter.getShowAdress(index),
     addShow: async (description, durationInDays) =>
         comedyTheaterAdapter.addShow(description, durationInDays),
+    isManager: async() => comedyTheaterAdapter.isManager(),
 }
 )
