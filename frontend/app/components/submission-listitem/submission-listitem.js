@@ -23,6 +23,7 @@ export default function SubmissionListItem({ address, index }) {
             try {
                 setData({ loading: true });
                 const precision = await comedyClashRepo.getPrecision();
+                const isClosed = await comedyClashRepo.isClosed(showAddress);
                 const submission = await comedyClashRepo.getSubmission(address, index);
 
                 const scaledValue = submission.averageValue * 100n; // Scaled for two decimals
@@ -36,6 +37,7 @@ export default function SubmissionListItem({ address, index }) {
                 setData({
                     loading: false,
                     id: submission.id,
+                    isClosed: isClosed,
                     artistAddress: submission.artist,
                     name: submission.name,
                     topic: submission.topic,
@@ -55,7 +57,7 @@ export default function SubmissionListItem({ address, index }) {
 
     const handleNavigate = () => {
         console.log(`SubmissionListItem: submission address:${address}`);
-        
+
         router.push(`/showdetails/${showAddress}/createvoting/${address}`);
     };
 
@@ -74,11 +76,13 @@ export default function SubmissionListItem({ address, index }) {
                 <td>{data.averageCount}</td>
                 <td>{data.averageValue}</td>
                 <td>
-                    <Button basic
-                        disabled={data.loading}
-                        onClick={handleNavigate}>
-                        Vote
-                    </Button>
+                    {!data.isClosed && (
+                        <Button basic
+                            disabled={data.loading}
+                            onClick={handleNavigate}>
+                            Vote
+                        </Button>
+                    )}
                 </td>
             </tr >
         );
