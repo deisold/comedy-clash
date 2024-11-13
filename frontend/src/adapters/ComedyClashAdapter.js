@@ -36,5 +36,6 @@ export const ComedyClashAdapter = (web3Provider, address) => {
 
         createVotingForSubmission: async (index, voterName, comment, value) =>
             (await getContract()).createVotingForSubmission(index, voterName, comment, value),
+        closeSubmission: async () => (await getContract()).closeSubmission(),
     }
 }

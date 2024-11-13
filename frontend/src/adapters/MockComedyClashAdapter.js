@@ -1,6 +1,9 @@
-
 export const MockComedyClashAdapter = (web3Provider, address) => {
     let submissions = 3;
+
+    let closed = new Proxy({}, {
+        get: (target, key) => key in target ? target[key] : address != 0
+    });
 
     const delay = (ms) => {
         return new Promise((resolve) => setTimeout(resolve, ms));
@@ -8,7 +11,7 @@ export const MockComedyClashAdapter = (web3Provider, address) => {
     return ({
         getPrecision: async () => BigInt(10n ** 18n),
         getDescription: async () => "Desc-" + address,
-        isClosed: async () => (address == 0) ? false : true,
+        isClosed: async () => closed[address],
         getSubmissionCount: async () => submissions,
 
         getSubmission: async (index) => ({
@@ -23,9 +26,12 @@ export const MockComedyClashAdapter = (web3Provider, address) => {
             averageValue: BigInt("4560000000000000000"),
         }),
         createVotingForSubmission: async (index, voterName, comment, value) => {
-            await delay(1000);
             submissions++
+            await delay(1000);
         },
-
+        closeSubmission: async () => {
+            closed[address] = true;
+            await delay(1000);
+        }
     })
 }
