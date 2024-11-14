@@ -2,19 +2,20 @@
 
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../components/providers';
 import { FormInput, Form, Button } from 'semantic-ui-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 
 export default function CreateShow() {
-    const { comedyTheaterRepo } = useAppContext();
+    const { comedyTheaterRepo, isManager: appIsManager } = useAppContext();
     const router = useRouter();
 
     const [description, setDescription] = useState('');
     const [days, setDays] = useState('');
 
+    const [isManager, setIsManager] = useState(false);
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
@@ -25,6 +26,14 @@ export default function CreateShow() {
     });
 
     const [submitted, setSubmitted] = useState(false);
+
+    useEffect(() => {
+        const isManager = appIsManager;
+        setIsManager(isManager);
+        if (!isManager ) {
+            setErrorMessage('You are not authorized to create a show');
+        }
+    }, [isManager, router]);
 
     const onChangeDescription = (e) => {
         setDescription(e.target.value)
@@ -127,7 +136,7 @@ export default function CreateShow() {
                 {!successMessage &&
                     <Button
                         loading={loading}
-                        disabled={loading || successMessage}
+                        disabled={loading || successMessage || !isManager}
                         onClick={handleSubmit}>
                         Submit
                     </Button>
