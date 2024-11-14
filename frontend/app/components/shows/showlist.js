@@ -4,13 +4,16 @@ import React, { useEffect, useState } from 'react';
 import { useAppContext } from '@/app/components/providers';
 import { Button } from 'semantic-ui-react';
 import { useRouter } from 'next/navigation';
-
+import { useBlockchainState } from '../providers/BlockchainStateProvider';
 import ShowListItem from '../showlistitem/showlistitem'
 
 export default function Home() {
-    const { comedyTheaterRepo } = useAppContext();
+    const { comedyTheaterRepo, isManager: appIsManager } = useAppContext();
+    const { canWrite } = useBlockchainState();
     const router = useRouter();
 
+    // isManager is true if the user is the manager of the theater (contract) AND can write to the blockchain
+    const [isManager, setIsManager] = useState(false);
     const [showAmount, setShowAmount] = useState(null);
 
     const handleNavigate = () => {
@@ -24,21 +27,25 @@ export default function Home() {
                 console.log(`amount=${amount}`);
                 setShowAmount(amount);
 
-                // get all show details
-
+                setIsManager(appIsManager);
             } catch (err) {
                 console.error(err);
             }
-        }
+        };
 
         init();
-    }, []);
+    }, [comedyTheaterRepo]);
 
     return (
         <div>
             <div>
                 <h2>The number of shows: {showAmount}</h2>
-                <Button primary floated='right' onClick={handleNavigate}>
+                <Button
+                    primary
+                    floated='right'
+                    style={{ display: !isManager ? 'none' : undefined }}
+                    disabled={!isManager}
+                    onClick={handleNavigate}>
                     Add Show
                 </Button>
 
