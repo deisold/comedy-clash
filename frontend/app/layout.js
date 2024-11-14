@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { BlockchainStateProvider } from './components/providers/BlockchainStateProvider'
 import { AppProvider } from './components/providers'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -13,9 +14,11 @@ export default function RootLayout({ children }) {
     return (
         <html lang="en">
             <body>
-                <AppProvider>
-                    {children}
-                </AppProvider>
+                <BlockchainStateProvider>
+                    <AppProvider>
+                        {children}
+                    </AppProvider>
+                </BlockchainStateProvider>
                 <ToastContainer
                     position="top-right"
                     autoClose={5000}

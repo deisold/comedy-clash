@@ -13,10 +13,14 @@ export async function initWeb3Provider() {
         if (typeof window !== 'undefined' && window.ethereum) {
             // Use BrowserProvider (MetaMask)
             provider = new ethers.BrowserProvider(window.ethereum);
+            console.log(`initWeb3Provider: using BrowserProvider(injected wallet)`);
+            
             // Request account access
             await window.ethereum.request({ method: 'eth_requestAccounts' });
         } else {
             // Fallback to read-only JsonRpcProvider
+            console.log("initWeb3Provider: using JsonRpcProvider(infura)");
+
             provider = new ethers.JsonRpcProvider(process.env.NEXT_PUBLIC_INFURA_ENDPOINT);
         }
         

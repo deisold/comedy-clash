@@ -6,7 +6,7 @@ import { initWeb3Provider, isWriteProvider, getSigner, getNetwork } from '../../
 const BlockchainStateContext = createContext({});
 
 export function BlockchainStateProvider({ children }) {
-    const [blockchainState, setBlockchainState] = useState({
+    const [state, setState] = useState({
         provider: null,
         signer: null,
         currentAddress: null,
@@ -18,13 +18,18 @@ export function BlockchainStateProvider({ children }) {
     });
 
     const updateBlockchainState = async (provider) => {
+        console.log(`updateBlockchainState: provider=${provider}`);
+        
         try {
             const network = await getNetwork(provider);
+    
             const canWrite = isWriteProvider(provider);
+            console.log(`updateBlockchainState: canWrite=${canWrite}`);
+            
             let signer = null;
             let address = null;
 
-            setBlockchainState({
+            setState({
                 provider,
                 signer,
                 currentAddress: address,
@@ -36,7 +41,7 @@ export function BlockchainStateProvider({ children }) {
             });
         } catch (error) {
             console.error('Failed to update blockchain state:', error);
-            setBlockchainState(prev => ({
+            setState(prev => ({
                 ...prev,
                 isLoading: false,
                 error: error.message
@@ -48,11 +53,11 @@ export function BlockchainStateProvider({ children }) {
     useEffect(() => {
         const initialize = async () => {
             try {
-                const provider = await initWeb3Provider();
-                await updateBlockchainState(provider);
+                const provider = await initWeb3Provider();                
+                await updateBlockchainState(provider);                
             } catch (error) {
                 console.error('Failed to initialize blockchain state:', error);
-                setBlockchainState(prev => ({
+                setState(prev => ({
                     ...prev,
                     isLoading: false,
                     error: error.message
@@ -62,7 +67,7 @@ export function BlockchainStateProvider({ children }) {
 
         // Store disconnect handler as a reference so we can remove it later
         const handleDisconnect = () => {
-            setBlockchainState(prev => ({
+            setState(prev => ({
                 ...prev,
                 isConnected: false,
                 canWrite: false,
@@ -94,7 +99,7 @@ export function BlockchainStateProvider({ children }) {
     return (
         <BlockchainStateContext.Provider 
             value={{
-                ...blockchainState,
+                ...state,
             }}
         >
             {children}

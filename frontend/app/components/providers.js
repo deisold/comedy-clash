@@ -1,8 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect } from 'react';
-import { initWeb3Provider } from '../source/utils/web3';
-import { BlockchainStateProvider } from './providers/BlockchainStateProvider';
+import {  useBlockchainState } from './providers/BlockchainStateProvider';
 import { ComedyTheaterAdapter } from '../source/adapters/ComedyTheaterAdapter';
 import { MockComedyTheaterAdapter } from '../source/adapters/MockComedyTheaterAdapter';
 import { ComedyTheaterRepo } from '../source/repositories/ComedyTheaterRepo'
@@ -27,27 +26,44 @@ export function AppProvider({ children }) {
         comedyClashRepo: null,
         isManager: false
     });
-    
-    const useMockData = JSON.parse(process.env.NEXT_PUBLIC_USE_MOCKDATA || false);
+
+    const { isLoading: blockchainInitLoading, provider, error:blockchainError } = useBlockchainState();
+    console.log(`AppProvider: blockchainInitLoading=${blockchainInitLoading}`);
+
+    const useMockData = JSON.parse(process.env.NEXT_PUBLIC_USE_MOCKDATA);
     const comedyTheaterAddress = process.env.NEXT_PUBLIC_COMEDY_THEATER_ADDRESS;
 
     useEffect(() => {
         const init = async () => {
+            console.log(`AppProvider: init: blockchainInitLoading=${blockchainInitLoading}`);
+            
+            if (blockchainInitLoading) {
+                return; // Wait until the blockchain state is ready
+            }
+            
+            if (blockchainError) {
+                setState(prev => ({
+                    ...prev,
+                    error: blockchainError
+                }));
+                return;
+            }
+            
             try {
-                if (!comedyTheaterAddress && !useMockData) {
+                console.log(`AppProvider: init: provider=${provider}`);
+
+                if (!comedyTheaterAddress) {
                     throw new Error('Comedy Theater contract address not configured');
                 }
 
-                const provider = await initWeb3Provider();
-                
                 const theaterRepo = ComedyTheaterRepo(
-                    useMockData 
+                    useMockData
                         ? MockComedyTheaterAdapter()
                         : ComedyTheaterAdapter(provider, comedyTheaterAddress)
                 );
 
                 const clashRepo = ComedyClashRepo(
-                    provider, 
+                    provider,
                     useMockData ? MockComedyClashAdapter : ComedyClashAdapter
                 );
 
@@ -72,12 +88,12 @@ export function AppProvider({ children }) {
         };
 
         init();
-    }, []);
+    }, [blockchainInitLoading, provider]);
 
     if (state.isLoading) {
         return (
             <div className="flex items-center justify-center min-h-screen">
-                <LoadingSpinner /> 
+                <LoadingSpinner />
                 <p className="ml-2">Initializing application...</p>
             </div>
         );
@@ -89,7 +105,7 @@ export function AppProvider({ children }) {
                 <div className="text-red-500 mb-4">
                     {state.error}
                 </div>
-                <button 
+                <button
                     onClick={() => window.location.reload()}
                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                 >
@@ -100,8 +116,8 @@ export function AppProvider({ children }) {
     }
 
     return (
-        <AppContext.Provider value={{ 
-            comedyTheaterRepo: state.comedyTheaterRepo, 
+        <AppContext.Provider value={{
+            comedyTheaterRepo: state.comedyTheaterRepo,
             comedyClashRepo: state.comedyClashRepo,
             isManager: state.isManager
         }}>
@@ -116,14 +132,4 @@ export function useAppContext() {
         throw new Error('useAppContext must be used within an AppProvider');
     }
     return context;
-}
-
-export function Providers({ children }) {
-    return (
-        <BlockchainStateProvider>
-            <AppProvider>
-                {children}
-            </AppProvider>
-        </BlockchainStateProvider>
-    );
 }
