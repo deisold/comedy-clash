@@ -4,12 +4,10 @@ import React, { useEffect, useState } from 'react';
 import { useAppContext } from '@/app/components/providers';
 import { Button } from 'semantic-ui-react';
 import { useRouter } from 'next/navigation';
-import { useBlockchainState } from '../providers/BlockchainStateProvider';
 import ShowListItem from '../showlistitem/showlistitem'
 
 export default function Home() {
     const { comedyTheaterRepo, isManager: appIsManager } = useAppContext();
-    const { canWrite } = useBlockchainState();
     const router = useRouter();
 
     // isManager is true if the user is the manager of the theater (contract) AND can write to the blockchain
