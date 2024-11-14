@@ -8,9 +8,11 @@ import { useEffect, useState } from 'react';
 import { useAppContext } from '@/app/components/providers';
 import { Button } from 'semantic-ui-react';
 import { useRouter, useParams } from 'next/navigation';
+import { useBlockchainState } from '../providers/BlockchainStateProvider';
 
 export default function SubmissionListItem({ address, index }) {
     const { comedyClashRepo } = useAppContext();
+    const { canWrite } = useBlockchainState();
     const router = useRouter();
 
     const [data, setData] = useState({ loading: true });
@@ -19,7 +21,7 @@ export default function SubmissionListItem({ address, index }) {
     const { showAddress } = useParams();
 
     useEffect(() => {
-        const init = async () => {
+        const init = async () => {            
             try {
                 setData({ loading: true });
                 const precision = await comedyClashRepo.getPrecision();
@@ -78,7 +80,7 @@ export default function SubmissionListItem({ address, index }) {
                 <td>
                     {!data.isClosed && (
                         <Button basic
-                            disabled={data.loading}
+                            disabled={data.loading || !canWrite}
                             onClick={handleNavigate}>
                             Vote
                         </Button>
