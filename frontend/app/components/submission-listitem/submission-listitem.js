@@ -10,7 +10,7 @@ import { Button } from 'semantic-ui-react';
 import { useRouter, useParams } from 'next/navigation';
 import { useBlockchainState } from '../providers/BlockchainStateProvider';
 
-export default function SubmissionListItem({ address, index }) {
+export default function SubmissionListItem({ address, index, submission }) {
     const { comedyClashRepo } = useAppContext();
     const { canWrite } = useBlockchainState();
     const router = useRouter();
@@ -26,7 +26,6 @@ export default function SubmissionListItem({ address, index }) {
                 setData({ loading: true });
                 const precision = await comedyClashRepo.getPrecision();
                 const isClosed = await comedyClashRepo.isClosed(showAddress);
-                const submission = await comedyClashRepo.getSubmission(address, index);
 
                 const scaledValue = submission.averageValue * 100n; // Scaled for two decimals
                 const averageWithTwoDecimals = scaledValue / precision; // Divide by PRECISION to scale it back down
@@ -55,7 +54,7 @@ export default function SubmissionListItem({ address, index }) {
         }
 
         init();
-    }, [comedyClashRepo, address, index]);
+    }, [comedyClashRepo, address, index, submission]);
 
     const handleNavigate = () => {
         console.log(`SubmissionListItem: submission address:${address}`);

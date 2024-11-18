@@ -19,10 +19,21 @@ export default function ShowDetails() {
     const [details, setDetails] = useState({
         loading: false,
         description: '',
-        submissionCount: 0
+        submissionCount: 0,
+        submissions: [],
     });
 
     const { showAddress } = useParams();
+
+
+    const buildOrderedSubmissions = async (submissionCount) => {
+        const submissions = await Promise.all(
+            Array.from({ length: submissionCount }, (_, index) => {
+                return comedyClashRepo.getSubmission(showAddress, index);
+            })
+        );
+        return submissions.sort((a, b) => (a.averageValue < b.averageValue ? 1 : -1));
+    }
 
     useEffect(() => {
         const controller = new AbortController();
@@ -33,15 +44,16 @@ export default function ShowDetails() {
                 setError('');
 
                 const showDescription = await comedyClashRepo.getDescription(showAddress);
-
                 if (controller.signal.aborted) return;
                 const submissionCount = await comedyClashRepo.getSubmissionCount(showAddress);
-
+                if (controller.signal.aborted) return;
+                const submissions = await buildOrderedSubmissions(submissionCount);
                 if (controller.signal.aborted) return;
 
                 setDetails({
                     description: showDescription,
                     submissionCount: submissionCount,
+                    submissions: submissions,
                 });
             }
             catch (err) {
@@ -92,8 +104,8 @@ export default function ShowDetails() {
                         </tr>
                     </thead>
                     <tbody>
-                        {Array.from({ length: details.submissionCount }, (_, index) => (
-                            <SubmissionListItem key={index} address={showAddress} index={index} />
+                        {details.submissions.map((submission, index) => (
+                            <SubmissionListItem key={index} address={showAddress} index={index} submission={submission} />
                         ))}
                     </tbody>
                 </table>
