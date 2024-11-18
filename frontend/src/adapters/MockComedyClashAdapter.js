@@ -23,7 +23,10 @@ export const MockComedyClashAdapter = (web3Provider, address) => {
             votes: [{}],
             averageTotal: index * 8,
             averageCount: index + 10,
-            averageValue: BigInt("4560000000000000000"),
+            averageValue: BigInt(Math.floor(Math.random() * 401 + 100).toString() + Array(16).fill(0).map(() =>
+                Math.floor(Math.random() * 10)).join('')),
+
+
         }),
         createVotingForSubmission: async (index, voterName, comment, value) => {
             submissions++
