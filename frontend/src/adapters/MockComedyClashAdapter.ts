@@ -1,20 +1,22 @@
-export const MockComedyClashAdapter = (web3Provider, address) => {
+import { Provider } from "ethers";
+
+export const MockComedyClashAdapter = (web3Provider: Provider, address: string) => {
     let submissions = 3;
 
     let closed = new Proxy({}, {
-        get: (target, key) => key in target ? target[key] : address != 0
+        get: (target, key) => key in target ? target[key] : address != '0'
     });
 
-    const delay = (ms) => {
+    const delay = (ms: number) => {
         return new Promise((resolve) => setTimeout(resolve, ms));
     };
     return ({
-        getPrecision: async () => BigInt(10n ** 18n),
+        getPrecision: async () => BigInt(10 ** 18),
         getDescription: async () => "Desc-" + address,
         isClosed: async () => closed[address],
         getSubmissionCount: async () => submissions,
 
-        getSubmission: async (index) => ({
+        getSubmission: async (index: number) => ({
             id: index,
             artistAddress: 900 + index,
             name: `Name${index}`,
@@ -28,7 +30,7 @@ export const MockComedyClashAdapter = (web3Provider, address) => {
 
 
         }),
-        createVotingForSubmission: async (index, voterName, comment, value) => {
+        createVotingForSubmission: async (index: number, voterName: string, comment: string, value: BigInt): Promise<void> => {
             submissions++
             await delay(1000);
         },
