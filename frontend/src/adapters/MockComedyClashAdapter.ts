@@ -3,9 +3,14 @@ import { Provider } from "ethers";
 export const MockComedyClashAdapter = (web3Provider: Provider, address: string) => {
     let submissions = 3;
 
-    let closed = new Proxy({}, {
-        get: (target, key) => key in target ? target[key] : address != '0'
-    });
+    let closed = new Proxy<{ [key: string]: boolean }>(
+        {},
+        {
+            get: (target, key: string): boolean => {
+                return key !== '0';
+            }
+        }
+    );
 
     const delay = (ms: number) => {
         return new Promise((resolve) => setTimeout(resolve, ms));
