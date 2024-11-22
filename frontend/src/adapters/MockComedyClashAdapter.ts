@@ -19,7 +19,7 @@ export const MockComedyClashAdapter = (web3Provider: Provider, address: string) 
         getPrecision: async () => BigInt(10 ** 18),
         getDescription: async () => "Desc-" + address,
         isClosed: async () => closed[address],
-        getSubmissionCount: async () => submissions,
+        getSubmissionCount: async (): Promise<bigint> => BigInt(submissions),
 
         getSubmission: async (index: number) => ({
             id: index,
@@ -27,7 +27,7 @@ export const MockComedyClashAdapter = (web3Provider: Provider, address: string) 
             name: `Name${index}`,
             topic: `Topic${index}`,
             preview: `Preview${index}`,
-            votes: [{}],
+            // votes: is not returned but also not needed
             averageTotal: index * 8,
             averageCount: index + 10,
             averageValue: BigInt(Math.floor(Math.random() * 401 + 100).toString() + Array(16).fill(0).map(() =>
