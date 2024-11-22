@@ -15,7 +15,7 @@ export default function Home() {
     const [showAmount, setShowAmount] = useState(null);
 
     const handleNavigate = () => {
-        router.push('/createshow'); // Replace with the path you want to navigate to
+        router.push('/createShow'); 
     };
 
     useEffect(() => {
