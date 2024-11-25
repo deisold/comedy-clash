@@ -42,6 +42,7 @@ export default [
     rules: {
       ...js.configs.recommended.rules,
       ...pluginReact.configs.recommended.rules,
+      "react/jsx-filename-extension": [1, { "extensions": [".tsx"] }],
       // Add any custom rules here
     },
     settings: {
