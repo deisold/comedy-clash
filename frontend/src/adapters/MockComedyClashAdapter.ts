@@ -1,6 +1,7 @@
 import { Provider } from "ethers";
+import { ComedyClashAdapterType } from "./ComedyClashAdapterType";
 
-export const MockComedyClashAdapter = (web3Provider: Provider, address: string) => {
+export const MockComedyClashAdapter = (web3Provider: Provider, address: string): ComedyClashAdapterType => {
     let submissions = 3;
 
     let closed = new Proxy<{ [key: string]: boolean }>(
@@ -35,7 +36,7 @@ export const MockComedyClashAdapter = (web3Provider: Provider, address: string) 
 
 
         }),
-        createVotingForSubmission: async (index: number, voterName: string, comment: string, value: BigInt): Promise<void> => {
+        createVotingForSubmission: async (index: number, voterName: string, comment: string, value: bigint): Promise<void> => {
             submissions++
             await delay(1000);
         },

@@ -1,7 +1,9 @@
 import { Provider, BigNumberish } from "ethers";
 import { ComedyClash, ComedyClash__factory } from "../utils/types";
+import { ComedyClashAdapterType } from "./ComedyClashAdapterType";
 
-export const ComedyClashAdapter = (web3Provider: Provider, address: string) => {
+
+export const ComedyClashAdapter = (web3Provider: Provider, address: string): ComedyClashAdapterType => {
     let contract: ComedyClash | null = null;
 
     async function getContract() {
@@ -30,7 +32,7 @@ export const ComedyClashAdapter = (web3Provider: Provider, address: string) => {
             })
         },
 
-        createVotingForSubmission: async (index: number, voterName: string, comment: string, value: BigNumberish): Promise<void> => {
+        createVotingForSubmission: async (index: number, voterName: string, comment: string, value: bigint): Promise<void> => {
             (await getContract()).createVotingForSubmission(index, voterName, comment, value);
         },
 

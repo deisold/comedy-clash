@@ -1,14 +1,24 @@
 import { Provider, BigNumberish } from "ethers";
-import { ComedyClashAdapter } from "../adapters/ComedyClashAdapter";
+import { ComedyClashAdapterType } from "../adapters/ComedyClashAdapterType";
+
+export type ComedyClashRepoType = {
+    getPrecision: (address: string) => Promise<BigInt>;
+    getDescription: (address: string) => Promise<string>;
+    isClosed: (address: string) => Promise<boolean>;
+    getSubmissionCount: (address: string) => Promise<number>;
+    getSubmission: (address: string, index: number) => Promise<any>;
+    createVotingForSubmission: (address: string, index: number, voterName: string, comment: string, value: bigint) => Promise<any>;
+    closeSubmission: (address: string) => Promise<any>;
+}
 
 export const ComedyClashRepo = (
     web3Provider: Provider,
-    comedyTheaterAdapterfabric: (web3Provider: Provider, address: string) => typeof ComedyClashAdapter) => {
-    const adapters = new Map();
+    comedyTheaterAdapterfabric: (web3Provider: Provider, address: string) => ComedyClashAdapterType): ComedyClashRepoType => {
+    const adapters = new Map<string, ComedyClashAdapterType>();
 
-    async function getAdapter(address: string) {
-        return adapters[address]
-            || (adapters[address] = comedyTheaterAdapterfabric(web3Provider, address));
+    async function getAdapter(address: string): Promise<ComedyClashAdapterType> {
+        return adapters.get(address)
+            ?? (adapters.set(address, comedyTheaterAdapterfabric(web3Provider, address)), adapters.get(address) as ComedyClashAdapterType);
     }
 
     return {
@@ -17,7 +27,7 @@ export const ComedyClashRepo = (
         isClosed: async (address: string): Promise<boolean> => (await getAdapter(address)).isClosed(),
         getSubmissionCount: async (address: string): Promise<number> => (Number(await (await getAdapter(address)).getSubmissionCount())),
         getSubmission: async (address: string, index: number) => (await getAdapter(address)).getSubmission(index),
-        createVotingForSubmission: async (address: string, index: number, voterName: string, comment: string, value: BigNumberish) =>
+        createVotingForSubmission: async (address: string, index: number, voterName: string, comment: string, value: bigint) =>
             (await getAdapter(address)).createVotingForSubmission(index, voterName, comment, value),
         closeSubmission: async (address: string) => (await getAdapter(address)).closeSubmission(),
     }

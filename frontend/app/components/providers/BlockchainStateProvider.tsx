@@ -1,12 +1,25 @@
 "use client"
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { initWeb3Provider, isWriteProvider, getSigner, getNetwork } from '../../source/utils/web3';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { initWeb3Provider, isWriteProvider, getNetwork } from '../../source/utils/web3';
+import { ethers, Provider, Signer } from 'ethers';
 
-const BlockchainStateContext = createContext({});
+interface BlockchainStateType {
+    provider: Provider | null;
+    signer: Signer | null;
+    currentAddress: string | null;
+    networkId: number | null;
+    isConnected: boolean;
+    canWrite: boolean;
+    isLoading: boolean;
+    error: string | null;
+}
 
-export function BlockchainStateProvider({ children }) {
-    const [state, setState] = useState({
+export const BlockchainStateContext = createContext<BlockchainStateType | undefined>(undefined);
+
+export function BlockchainStateProvider({ children }: { children: ReactNode }) {
+
+    const [state, setState] = useState<BlockchainStateType>({
         provider: null,
         signer: null,
         currentAddress: null,
@@ -17,15 +30,14 @@ export function BlockchainStateProvider({ children }) {
         error: null
     });
 
-    const updateBlockchainState = async (provider) => {
+    const updateBlockchainState = async (provider: ethers.Provider) => {
         console.log(`updateBlockchainState: provider=${provider}`);
-        
+
         try {
             const network = await getNetwork(provider);
-    
             const canWrite = isWriteProvider(provider);
             console.log(`updateBlockchainState: canWrite=${canWrite}`);
-            
+
             let signer = null;
             let address = null;
 
@@ -33,7 +45,7 @@ export function BlockchainStateProvider({ children }) {
                 provider,
                 signer,
                 currentAddress: address,
-                networkId: network?.chainId,
+                networkId: network?.chainId ? Number(network.chainId) : null,
                 isConnected: !!address,
                 canWrite,
                 isLoading: false,
@@ -44,7 +56,7 @@ export function BlockchainStateProvider({ children }) {
             setState(prev => ({
                 ...prev,
                 isLoading: false,
-                error: error.message
+                error: (error as Error).message
             }));
         }
     };
@@ -53,14 +65,14 @@ export function BlockchainStateProvider({ children }) {
     useEffect(() => {
         const initialize = async () => {
             try {
-                const provider = await initWeb3Provider();                
-                await updateBlockchainState(provider);                
+                const provider = await initWeb3Provider();
+                await updateBlockchainState(provider);
             } catch (error) {
                 console.error('Failed to initialize blockchain state:', error);
                 setState(prev => ({
                     ...prev,
                     isLoading: false,
-                    error: error.message
+                    error: (error as Error).message
                 }));
             }
         };
@@ -77,10 +89,10 @@ export function BlockchainStateProvider({ children }) {
         };
 
         // Set up listeners
-        if (typeof window !== 'undefined' && window.ethereum) {
-            window.ethereum.on('accountsChanged', initialize);
-            window.ethereum.on('chainChanged', initialize);
-            window.ethereum.on('disconnect', handleDisconnect);
+        if (typeof window !== 'undefined' && (window as any).ethereum) {
+            (window as any).ethereum.on('accountsChanged', initialize);
+            (window as any).ethereum.on('chainChanged', initialize);
+            (window as any).ethereum.on('disconnect', handleDisconnect);
         }
 
         // Initial setup
@@ -88,16 +100,18 @@ export function BlockchainStateProvider({ children }) {
 
         // Cleanup listeners
         return () => {
-            if (typeof window !== 'undefined' && window.ethereum) {
-                window.ethereum.removeListener('accountsChanged', initialize);
-                window.ethereum.removeListener('chainChanged', initialize);
-                window.ethereum.removeListener('disconnect', handleDisconnect);
+            if (typeof window !== 'undefined' && (window as any).ethereum) {
+                (window as any).ethereum.removeListener('accountsChanged', initialize);
+                (window as any).ethereum.removeListener('chainChanged', initialize);
+                (window as any).ethereum.removeListener('disconnect', handleDisconnect);
             }
         };
     }, []);
 
+    BlockchainStateContext.displayName = 'BlockchainStateContext';
+
     return (
-        <BlockchainStateContext.Provider 
+        <BlockchainStateContext.Provider
             value={{
                 ...state,
             }}
