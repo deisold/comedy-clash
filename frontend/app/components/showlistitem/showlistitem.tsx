@@ -7,13 +7,20 @@ import { Button } from 'semantic-ui-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 
-export default function ShowListItem({ index }) {
+interface ShowDetailsState {
+    address: string | null;
+    description: string | null;
+    isClosed: boolean;
+    submissionCount: number;
+}
+
+export default function ShowListItem({ index }: { index: number }) {
     const { comedyTheaterRepo, comedyClashRepo } = useAppContext();
     const router = useRouter();
 
     const [loading, setLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
-    const [showDetails, setShowDetails] = useState({
+    const [showDetails, setShowDetails] = useState<ShowDetailsState>({
         address: null,
         description: null,
         isClosed: true,
@@ -29,14 +36,14 @@ export default function ShowListItem({ index }) {
                 setLoading(true);
                 setErrorMessage('');
 
-                const showAddress = await comedyTheaterRepo.getShowAdress(index);
-                
-                if (controller.signal.aborted) return;
+                const showAddress = await comedyTheaterRepo!!.getShowAdress(index);
+
+                if (controller.signal.aborted || !comedyClashRepo) return;
 
                 const description = await comedyClashRepo.getDescription(showAddress);
                 const isClosed = await comedyClashRepo.isClosed(showAddress);
                 const submissionCount = await comedyClashRepo.getSubmissionCount(showAddress);
-                
+
                 if (controller.signal.aborted) return;
 
                 setShowDetails({
@@ -45,9 +52,9 @@ export default function ShowListItem({ index }) {
                     isClosed: isClosed,
                     submissionCount: submissionCount,
                 });
-            } catch (error) {
+            } catch (error: any) {
                 if (controller.signal.aborted) return;
-                
+
                 console.error('Error loading show details:', error);
                 setErrorMessage(error.message || 'Failed to load show details');
                 toast.error(error.message || 'Failed to load show details');
@@ -73,12 +80,15 @@ export default function ShowListItem({ index }) {
         console.log(`handleClose: address:${showDetails.address}`);
         setIsClosing(true);
         try {
+            if (!comedyClashRepo || !showDetails.address) {
+                return;
+            }
             await comedyClashRepo.closeSubmission(showDetails.address);
             setShowDetails(prevDetails => ({
                 ...prevDetails,
                 isClosed: true
             }));
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error closing show:', error);
             toast.error(error.message || 'Failed to close show');
         } finally {
@@ -89,7 +99,7 @@ export default function ShowListItem({ index }) {
     if (loading) {
         return (
             <tr>
-                <td colSpan="4" className="text-center">Loading...</td>
+                <td colSpan={4} className="text-center">Loading...</td>
             </tr>
         );
     }
@@ -97,12 +107,12 @@ export default function ShowListItem({ index }) {
     if (errorMessage) {
         return (
             <tr>
-                <td colSpan="4" className="text-center">
+                <td colSpan={4} className="text-center">
                     <div className="text-red-600 mb-2">
                         Error: {errorMessage}
                     </div>
-                    <Button 
-                        basic 
+                    <Button
+                        basic
                         size='small'
                         onClick={() => window.location.reload()}>
                         Try Again
