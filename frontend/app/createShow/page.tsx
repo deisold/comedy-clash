@@ -8,41 +8,40 @@ import { FormInput, Form, Button } from 'semantic-ui-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 
+interface ErrorMessages {
+    description: string;
+    days: string;
+}
+
 export default function CreateShow() {
     const { comedyTheaterRepo, isManager: appIsManager } = useAppContext();
     const router = useRouter();
 
-    const [description, setDescription] = useState('');
-    const [days, setDays] = useState('');
-
-    const [isManager, setIsManager] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
-
-    const [errors, setErrors] = useState({
-        description: '',
-        days: ''
-    });
-
-    const [submitted, setSubmitted] = useState(false);
+    const [description, setDescription] = useState<string>('');
+    const [days, setDays] = useState<string>('');
+    const [isManager, setIsManager] = useState<boolean>(false);
+    const [loading, setLoading] = useState<boolean>(false);
+    const [errorMessage, setErrorMessage] = useState<string>('');
+    const [successMessage, setSuccessMessage] = useState<string>('');
+    const [errors, setErrors] = useState<ErrorMessages>({ description: '', days: '' });
+    const [submitted, setSubmitted] = useState<boolean>(false);
 
     useEffect(() => {
         const isManager = appIsManager;
         setIsManager(isManager);
-        if (!isManager ) {
+        if (!isManager) {
             setErrorMessage('You are not authorized to create a show');
         }
     }, [isManager, router]);
 
-    const onChangeDescription = (e) => {
+    const onChangeDescription = (e: React.ChangeEvent<HTMLInputElement>) => {
         setDescription(e.target.value)
         if (errors.description) {
             setErrors((prevErrors) => ({ ...prevErrors, description: '' }));
             setSubmitted(false);
         }
     }
-    const onChangeDays = (e) => {
+    const onChangeDays = (e: React.ChangeEvent<HTMLInputElement>) => {
         setDays(e.target.value)
         if (errors.days) {
             setErrors((prevErrors) => ({ ...prevErrors, days: '' }));
@@ -51,7 +50,7 @@ export default function CreateShow() {
     }
 
     const validate = () => {
-        const newErrors = {};
+        const newErrors: ErrorMessages = { description: '', days: '' };
         if (!description.trim()) {
             newErrors.description = 'Please enter a description';
         }
@@ -66,25 +65,27 @@ export default function CreateShow() {
             newErrors.days = 'Maximum 30 days allowed';
         }
         setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
+
+        return Object.values(newErrors).every(value => value === '');
     };
 
     const handleSubmit = async () => {
         setSubmitted(true);
+
         if (validate()) {
             const controller = new AbortController();
 
             try {
                 setLoading(true);
                 setErrorMessage('');
-
-                await comedyTheaterRepo.addShow(description, days);
+                
+                await comedyTheaterRepo!!.addShow(description, Number(days));
 
                 if (controller.signal.aborted) return;
 
                 setSuccessMessage('Show successfully created!');
                 toast.success('Show successfully created!');
-            } catch (error) {
+            } catch (error: any) {
                 if (controller.signal.aborted) return;
 
                 console.error('Error creating show:', error);
@@ -113,7 +114,7 @@ export default function CreateShow() {
 
             <Form className="space-y-4">
                 <FormInput
-                    disabled={loading || successMessage}
+                    disabled={loading || Boolean(successMessage)}
                     error={submitted && errors.description ? { content: errors.description, pointing: 'below' } : null}
                     fluid
                     label='Description'
@@ -124,7 +125,7 @@ export default function CreateShow() {
                     onChange={onChangeDescription}
                 />
                 <FormInput
-                    disabled={loading || successMessage}
+                    disabled={loading || Boolean(successMessage)}
                     error={submitted && errors.days ? { content: errors.days } : null}
                     fluid
                     label='Submission window'
@@ -136,7 +137,7 @@ export default function CreateShow() {
                 {!successMessage &&
                     <Button
                         loading={loading}
-                        disabled={loading || successMessage || !isManager}
+                        disabled={loading || Boolean(successMessage) || !isManager}
                         onClick={handleSubmit}>
                         Submit
                     </Button>
