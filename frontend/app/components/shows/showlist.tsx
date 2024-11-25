@@ -12,16 +12,16 @@ export default function Home() {
 
     // isManager is true if the user is the manager of the theater (contract) AND can write to the blockchain
     const [isManager, setIsManager] = useState(false);
-    const [showAmount, setShowAmount] = useState(null);
+    const [showAmount, setShowAmount] = useState<number>(0);
 
     const handleNavigate = () => {
-        router.push('/createShow'); 
+        router.push('/createShow');
     };
 
     useEffect(() => {
         const init = async () => {
             try {
-                const amount = await comedyTheaterRepo.getShowAmount();
+                const amount: number = await comedyTheaterRepo!!.getShowAmount();
                 console.log(`amount=${amount}`);
                 setShowAmount(amount);
 
