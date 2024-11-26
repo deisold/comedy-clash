@@ -5,28 +5,40 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/app/components/providers'
 import { Button } from 'semantic-ui-react';
-import { useRouter, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { toast } from 'react-toastify';
 
 import SubmissionListItem from '@/app/components/submission-listitem/submission-listitem'
+import { Submission } from '@/app/source/data/submission';
+
+interface RouteParams {
+    [key: string]: string
+}
+
+interface ShowDetailState {
+    description: string;
+    submissionCount: number;
+    submissions: Submission[];
+}
 
 export default function ShowDetails() {
     const { comedyClashRepo } = useAppContext();
-    const router = useRouter();
 
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [details, setDetails] = useState({
-        loading: false,
+    const [details, setDetails] = useState<ShowDetailState>({
         description: '',
         submissionCount: 0,
         submissions: [],
     });
 
-    const { showAddress } = useParams();
+    const { showAddress } = useParams<RouteParams>();
 
+    const buildOrderedSubmissions = async (submissionCount: number) => {
+        if (comedyClashRepo == null || showAddress == null) {
+            return [];
+        }
 
-    const buildOrderedSubmissions = async (submissionCount) => {
         const submissions = await Promise.all(
             Array.from({ length: submissionCount }, (_, index) => {
                 return comedyClashRepo.getSubmission(showAddress, index);
@@ -40,6 +52,10 @@ export default function ShowDetails() {
 
         const init = async () => {
             try {
+                if (comedyClashRepo == null || showAddress == null) {
+                    throw new Error('ShowDetails: dependencies null');
+                }
+
                 setLoading(true);
                 setError('');
 
@@ -56,7 +72,7 @@ export default function ShowDetails() {
                     submissions: submissions,
                 });
             }
-            catch (err) {
+            catch (err: any) {
                 if (controller.signal.aborted) return;
 
                 setError(err.message || 'Failed to load show details');
