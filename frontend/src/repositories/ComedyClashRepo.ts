@@ -1,12 +1,13 @@
-import { Provider, BigNumberish } from "ethers";
+import { Provider } from "ethers";
 import { ComedyClashAdapterType } from "../adapters/ComedyClashAdapterType";
+import { Submission } from "../data/submission";
 
 export type ComedyClashRepoType = {
     getPrecision: (address: string) => Promise<BigInt>;
     getDescription: (address: string) => Promise<string>;
     isClosed: (address: string) => Promise<boolean>;
     getSubmissionCount: (address: string) => Promise<number>;
-    getSubmission: (address: string, index: number) => Promise<any>;
+    getSubmission: (address: string, index: number) => Promise<Submission>;
     createVotingForSubmission: (address: string, index: number, voterName: string, comment: string, value: bigint) => Promise<any>;
     closeSubmission: (address: string) => Promise<any>;
 }

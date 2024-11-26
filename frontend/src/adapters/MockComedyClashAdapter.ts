@@ -1,5 +1,6 @@
 import { Provider } from "ethers";
 import { ComedyClashAdapterType } from "./ComedyClashAdapterType";
+import { Submission } from "../data/submission";
 
 export const MockComedyClashAdapter = (web3Provider: Provider, address: string): ComedyClashAdapterType => {
     let submissions = 3;
@@ -22,9 +23,9 @@ export const MockComedyClashAdapter = (web3Provider: Provider, address: string):
         isClosed: async () => closed[address],
         getSubmissionCount: async (): Promise<bigint> => BigInt(submissions),
 
-        getSubmission: async (index: number) => ({
+        getSubmission: async (index: number): Promise<Submission> => ({
             id: index,
-            artistAddress: 900 + index,
+            artistAddress: String(900 + index),
             name: `Name${index}`,
             topic: `Topic${index}`,
             preview: `Preview${index}`,
@@ -33,8 +34,6 @@ export const MockComedyClashAdapter = (web3Provider: Provider, address: string):
             averageCount: index + 10,
             averageValue: BigInt(Math.floor(Math.random() * 401 + 100).toString() + Array(16).fill(0).map(() =>
                 Math.floor(Math.random() * 10)).join('')),
-
-
         }),
         createVotingForSubmission: async (index: number, voterName: string, comment: string, value: bigint): Promise<void> => {
             submissions++
