@@ -7,12 +7,27 @@ import { useAppContext } from '@/app/components/providers'
 import { FormInput, Form, Button } from 'semantic-ui-react';
 import { useRouter, useParams } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { InputChangeEvent } from '@/app/source/common/CommonTypes';
+import _ from 'lodash';
+
+interface RouteParams {
+    showAddress: string;
+    submissionIndex: string;
+    // Other params can be a string or undefined
+    [key: string]: string | undefined;
+}
+
+interface ErrorMessages {
+    name: string;
+    comment: string;
+    value: string;
+}
 
 export default function CreateVoting() {
     const { comedyClashRepo } = useAppContext();
     const router = useRouter();
 
-    const { showAddress, submissionIndex } = useParams();
+    const { showAddress, submissionIndex } = useParams<RouteParams>();
 
     const [name, setName] = useState('');
     const [comment, setComment] = useState('');
@@ -20,7 +35,7 @@ export default function CreateVoting() {
 
     const [loading, setLoading] = useState(false);
     // State for validation errors
-    const [errors, setErrors] = useState({
+    const [errors, setErrors] = useState<ErrorMessages>({
         name: '',
         comment: '',
         value: '',
@@ -31,7 +46,7 @@ export default function CreateVoting() {
 
     const [errorMessage, setErrorMessage] = useState('');
 
-    const onChangeName = (e) => {
+    const onChangeName = (e: InputChangeEvent) => {
         setName(e.target.value)
         setErrorMessage('')
 
@@ -41,7 +56,7 @@ export default function CreateVoting() {
         }
     }
 
-    const onChangeComment = (e) => {
+    const onChangeComment = (e: InputChangeEvent) => {
         setComment(e.target.value)
         setErrorMessage('')
 
@@ -51,7 +66,7 @@ export default function CreateVoting() {
         }
     }
 
-    const onChangeValue = (e) => {
+    const onChangeValue = (e: InputChangeEvent) => {
         setValue(e.target.value)
         setErrorMessage('')
 
@@ -62,44 +77,58 @@ export default function CreateVoting() {
     }
 
     const validate = () => {
-        const newErrors = {};
+        const newErrors: ErrorMessages = {
+            name: '',
+            comment: '',
+            value: '',
+        };
         if (!name) newErrors.name = 'Please enter your name';
         if (!comment) newErrors.comment = 'Please enter a comment';
         if (!value) {
             newErrors.value = 'Please enter a value';
-        } else if (value < 1) {
+        } else if (Number(value) < 1) {
             newErrors.value = 'At least 1 points';
-        } else if (value > 5) {
+        } else if (Number(value) > 5) {
             newErrors.value = 'Not more than 5 points';
         }
         setErrors(newErrors);
 
-        return Object.keys(newErrors).length === 0; // Returns true if no errors
+        return Object.values(newErrors).every(value => value === '');
     };
 
     const handleSubmit = async () => {
-        setSubmitted(true);
         if (validate()) {
+            setSubmitted(true);
             const controller = new AbortController();
-            
+
             try {
+                const isValidNumber = _.isFinite(_.toNumber(submissionIndex));
+                if (comedyClashRepo == null || showAddress == null || !isValidNumber) {
+                    throw new Error('ShowDetails: dependencies null');
+                }
+
                 setLoading(true);
                 setErrorMessage('');
-                
+
                 await comedyClashRepo.createVotingForSubmission(
-                    showAddress, submissionIndex, name, comment, value
+                    showAddress, Number(submissionIndex), name, comment, _.toNumber(value)
                 );
-                
+
                 if (controller.signal.aborted) return;
-                
+
                 setSuccessMessage('Voting successfully sent.');
                 toast.success('Voting successfully sent!');
-            } catch (error) {
+            } catch (error: unknown) {
+                setSubmitted(false);
                 if (controller.signal.aborted) return;
-                
-                console.error('Error creating voting:', error);
-                toast.error(error.message || 'Failed to submit voting. Please try again.');
-                setErrorMessage(error.message || 'Failed to submit voting. Please try again.');
+
+                if (error instanceof Error) {
+                    console.error('Error creating voting:', error);
+                    toast.error(error.message || 'Failed to submit voting. Please try again.');
+                    setErrorMessage(error.message || 'Failed to submit voting. Please try again.');
+                } else {
+                    console.error('An unknown error occurred');
+                }
             } finally {
                 if (!controller.signal.aborted) {
                     setLoading(false);
@@ -152,7 +181,7 @@ export default function CreateVoting() {
                 {!successMessage &&
                     <Button
                         loading={loading}
-                        disabled={loading || successMessage}
+                        disabled={loading || Boolean(successMessage)}
                         onClick={handleSubmit}>
                         Submit
                     </Button>

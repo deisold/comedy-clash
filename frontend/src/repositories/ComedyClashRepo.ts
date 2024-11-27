@@ -8,7 +8,7 @@ export type ComedyClashRepoType = {
     isClosed: (address: string) => Promise<boolean>;
     getSubmissionCount: (address: string) => Promise<number>;
     getSubmission: (address: string, index: number) => Promise<Submission>;
-    createVotingForSubmission: (address: string, index: number, voterName: string, comment: string, value: bigint) => Promise<any>;
+    createVotingForSubmission: (address: string, index: number, voterName: string, comment: string, value: number) => Promise<any>;
     closeSubmission: (address: string) => Promise<any>;
 }
 
@@ -28,8 +28,8 @@ export const ComedyClashRepo = (
         isClosed: async (address: string): Promise<boolean> => (await getAdapter(address)).isClosed(),
         getSubmissionCount: async (address: string): Promise<number> => (Number(await (await getAdapter(address)).getSubmissionCount())),
         getSubmission: async (address: string, index: number) => (await getAdapter(address)).getSubmission(index),
-        createVotingForSubmission: async (address: string, index: number, voterName: string, comment: string, value: bigint) =>
-            (await getAdapter(address)).createVotingForSubmission(index, voterName, comment, value),
+        createVotingForSubmission: async (address: string, index: number, voterName: string, comment: string, value: number) =>
+            (await getAdapter(address)).createVotingForSubmission(index, voterName, comment, BigInt(value)),
         closeSubmission: async (address: string) => (await getAdapter(address)).closeSubmission(),
     }
 
