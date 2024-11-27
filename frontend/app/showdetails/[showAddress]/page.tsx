@@ -12,7 +12,9 @@ import SubmissionListItem from '@/app/components/submission-listitem/submission-
 import { Submission } from '@/app/source/data/submission';
 
 interface RouteParams {
-    [key: string]: string
+    showAddress: string;
+    // Other params can be a string or undefined
+    [key: string]: string | undefined;
 }
 
 interface ShowDetailState {
