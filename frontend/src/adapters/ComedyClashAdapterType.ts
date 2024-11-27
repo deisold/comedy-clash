@@ -3,7 +3,7 @@ import { BigNumberish } from "ethers";
 import { Submission } from "../data/submission";
 
 export type ComedyClashAdapterType = {
-    getPrecision: () => Promise<BigInt>;
+    getPrecision: () => Promise<bigint>;
     getDescription: () => Promise<string>;
     isClosed: () => Promise<boolean>;
     getSubmissionCount: () => Promise<bigint>;

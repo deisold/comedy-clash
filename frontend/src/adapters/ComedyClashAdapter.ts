@@ -11,7 +11,7 @@ export const ComedyClashAdapter = (web3Provider: Provider, address: string): Com
     }
 
     return {
-        getPrecision: async (): Promise<BigInt> => (await getContract()).PRECISION(),
+        getPrecision: async (): Promise<bigint> => (await getContract()).PRECISION(),
         getDescription: async (): Promise<string> => (await getContract()).description(),
         isClosed: async (): Promise<boolean> => (await getContract()).closed(),
         getSubmissionCount: async (): Promise<bigint> => (await getContract()).submissionCount(),

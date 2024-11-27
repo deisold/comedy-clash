@@ -3,7 +3,7 @@ import { ComedyClashAdapterType } from "../adapters/ComedyClashAdapterType";
 import { Submission } from "../data/submission";
 
 export type ComedyClashRepoType = {
-    getPrecision: (address: string) => Promise<BigInt>;
+    getPrecision: (address: string) => Promise<bigint>;
     getDescription: (address: string) => Promise<string>;
     isClosed: (address: string) => Promise<boolean>;
     getSubmissionCount: (address: string) => Promise<number>;
@@ -23,7 +23,7 @@ export const ComedyClashRepo = (
     }
 
     return {
-        getPrecision: async (address: string): Promise<BigInt> => (await getAdapter(address)).getPrecision(),
+        getPrecision: async (address: string): Promise<bigint> => (await getAdapter(address)).getPrecision(),
         getDescription: async (address: string): Promise<string> => (await getAdapter(address)).getDescription(),
         isClosed: async (address: string): Promise<boolean> => (await getAdapter(address)).isClosed(),
         getSubmissionCount: async (address: string): Promise<number> => (Number(await (await getAdapter(address)).getSubmissionCount())),
