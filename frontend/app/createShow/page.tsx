@@ -7,6 +7,7 @@ import { useAppContext } from '../components/providers';
 import { FormInput, Form, Button } from 'semantic-ui-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
+import { InputChangeEvent } from '../source/common/CommonTypes';
 
 interface ErrorMessages {
     description: string;
@@ -34,14 +35,14 @@ export default function CreateShow() {
         }
     }, [isManager, router]);
 
-    const onChangeDescription = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const onChangeDescription = (e: InputChangeEvent) => {
         setDescription(e.target.value)
         if (errors.description) {
             setErrors((prevErrors) => ({ ...prevErrors, description: '' }));
             setSubmitted(false);
         }
     }
-    const onChangeDays = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const onChangeDays = (e: InputChangeEvent) => {
         setDays(e.target.value)
         if (errors.days) {
             setErrors((prevErrors) => ({ ...prevErrors, days: '' }));
