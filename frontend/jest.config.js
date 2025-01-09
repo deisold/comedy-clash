@@ -7,7 +7,7 @@ const { compilerOptions } = require('./tsconfig.json');
 
 export default {
   preset: 'ts-jest',
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom', // Change to jsdom for React testing
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@/app/(.*)$': '<rootDir>/src/app/$1',

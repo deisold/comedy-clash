@@ -5,7 +5,7 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 
-import { useAppContext } from '@/app/components/providers';
+import { useAppContext } from '@/app/components/providers/providers';
 import { Button } from 'semantic-ui-react';
 import { useRouter, useParams } from 'next/navigation';
 import { useBlockchainState } from '../providers/BlockchainStateProvider';

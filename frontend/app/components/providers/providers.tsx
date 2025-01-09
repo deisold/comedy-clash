@@ -1,14 +1,14 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { useBlockchainState } from './providers/BlockchainStateProvider';
-import { ComedyTheaterAdapter } from '../source/adapters/ComedyTheaterAdapter';
-import { MockComedyTheaterAdapter } from '../source/adapters/MockComedyTheaterAdapter';
-import { ComedyTheaterRepo, ComedyTheaterRepoType } from '../source/repositories/ComedyTheaterRepo'
-import { ComedyClashAdapter } from '../source/adapters/ComedyClashAdapter';
-import { MockComedyClashAdapter } from '../source/adapters/MockComedyClashAdapter';
-import { ComedyClashRepo, ComedyClashRepoType } from '../source/repositories/ComedyClashRepo';
-import { LoadingSpinner } from './ui/LoadingSpinner';
+import { useBlockchainState } from './BlockchainStateProvider';
+import { ComedyTheaterAdapter } from '../../source/adapters/ComedyTheaterAdapter';
+import { MockComedyTheaterAdapter } from '../../source/adapters/MockComedyTheaterAdapter';
+import { ComedyTheaterRepo, ComedyTheaterRepoType } from '../../source/repositories/ComedyTheaterRepo'
+import { ComedyClashAdapter } from '../../source/adapters/ComedyClashAdapter';
+import { MockComedyClashAdapter } from '../../source/adapters/MockComedyClashAdapter';
+import { ComedyClashRepo, ComedyClashRepoType } from '../../source/repositories/ComedyClashRepo';
+import { LoadingSpinner } from '../ui/LoadingSpinner';
 
 interface AppContextType {
     comedyTheaterRepo: ComedyTheaterRepoType | null;

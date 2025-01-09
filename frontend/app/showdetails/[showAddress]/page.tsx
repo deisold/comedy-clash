@@ -3,7 +3,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { useAppContext } from '@/app/components/providers'
+import { useAppContext } from '@/app/components/providers/providers'
 import { Button } from 'semantic-ui-react';
 import { useParams } from 'next/navigation';
 import { toast } from 'react-toastify';

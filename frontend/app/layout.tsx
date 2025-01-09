@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { BlockchainStateProvider } from './components/providers/BlockchainStateProvider'
-import { AppProvider } from './components/providers'
+import { AppProvider } from './components/providers/providers'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
