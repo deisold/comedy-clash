@@ -1,7 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { initWeb3Provider, isWriteProvider, getNetwork } from '../../source/utils/web3';
+import { initWeb3Provider, isWriteProvider, getNetwork, getSigner } from '../../source/utils/web3';
 import { ethers, Provider, Signer } from 'ethers';
 
 interface BlockchainStateType {
@@ -36,9 +36,9 @@ export function BlockchainStateProvider({ children }: { children: ReactNode }) {
         try {
             const network = await getNetwork(provider);
             const canWrite = isWriteProvider(provider);
-            console.log(`updateBlockchainState: canWrite=${canWrite}`);
+            const signer = canWrite ? await getSigner(provider) : null;
+            console.log(`updateBlockchainState: canWrite=${canWrite}, signer=${signer}`);
 
-            let signer = null;
             let address = null;
 
             setState({
