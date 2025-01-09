@@ -74,6 +74,7 @@ export function AppProvider({ children }: AppProviderProps) {
 
                 const clashRepo = ComedyClashRepo(
                     provider!!,
+                    signer,
                     useMockData ? MockComedyClashAdapter : ComedyClashAdapter
                 );
 

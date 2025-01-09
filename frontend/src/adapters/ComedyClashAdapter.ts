@@ -1,23 +1,30 @@
-import { Provider, BigNumberish } from "ethers";
+import { ContractTransactionResponse, Provider, Signer } from "ethers";
 import { ComedyClash, ComedyClash__factory } from "../utils/types";
 import { ComedyClashAdapterType } from "./ComedyClashAdapterType";
 import { Submission } from "../data/submission";
 
-export const ComedyClashAdapter = (web3Provider: Provider, address: string): ComedyClashAdapterType => {
-    let contract: ComedyClash | null = null;
+export const ComedyClashAdapter = (web3Provider: Provider, signer: Signer | null, address: string): ComedyClashAdapterType => {
+    let contractReadOnly: ComedyClash | null = null;
 
-    async function getContract() {
-        return contract || ComedyClash__factory.connect(address, web3Provider);
+    async function getContractReadOnly() {
+        return contractReadOnly || ComedyClash__factory.connect(address, web3Provider);
+    }
+
+    async function getContractForWrite() {
+        console.log(`getContractForWrite: web3Provider signers=${signer}`);
+        if (!signer) throw new Error("Connection read-only!");
+
+        return ComedyClash__factory.connect(address, signer);
     }
 
     return {
-        getPrecision: async (): Promise<bigint> => (await getContract()).PRECISION(),
-        getDescription: async (): Promise<string> => (await getContract()).description(),
-        isClosed: async (): Promise<boolean> => (await getContract()).closed(),
-        getSubmissionCount: async (): Promise<bigint> => (await getContract()).submissionCount(),
+        getPrecision: async (): Promise<bigint> => (await getContractReadOnly()).PRECISION(),
+        getDescription: async (): Promise<string> => (await getContractReadOnly()).description(),
+        isClosed: async (): Promise<boolean> => (await getContractReadOnly()).closed(),
+        getSubmissionCount: async (): Promise<bigint> => (await getContractReadOnly()).submissionCount(),
 
         getSubmission: async (index: number): Promise<Submission> => {
-            const submission = await (await getContract()).submissions(index);
+            const submission = await (await getContractReadOnly()).submissions(index);
 
             return ({
                 id: Number(submission.id),
@@ -32,12 +39,12 @@ export const ComedyClashAdapter = (web3Provider: Provider, address: string): Com
             })
         },
 
-        createVotingForSubmission: async (index: number, voterName: string, comment: string, value: bigint): Promise<void> => {
-            (await getContract()).createVotingForSubmission(index, voterName, comment, value);
+        createVotingForSubmission: async (index: number, voterName: string, comment: string, value: bigint): Promise<ContractTransactionResponse> => {
+            return (await getContractForWrite()).createVotingForSubmission(index, voterName, comment, value);
         },
 
-        closeSubmission: async (): Promise<void> => {
-            (await getContract()).closeSubmission();
+        closeSubmission: async (): Promise<ContractTransactionResponse> => {
+            return (await getContractForWrite()).closeSubmission();
         },
     }
 }

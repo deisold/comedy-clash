@@ -1,8 +1,8 @@
-import { Provider } from "ethers";
+import { Provider, Signer } from "ethers";
 import { ComedyClashAdapterType } from "./ComedyClashAdapterType";
 import { Submission } from "../data/submission";
 
-export const MockComedyClashAdapter = (web3Provider: Provider, address: string): ComedyClashAdapterType => {
+export const MockComedyClashAdapter = (web3Provider: Provider, signer: Signer | null, address: string): ComedyClashAdapterType => {
     let submissions = 3;
 
     let closed = new Proxy<{ [key: string]: boolean }>(

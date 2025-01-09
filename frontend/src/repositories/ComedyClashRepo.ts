@@ -1,4 +1,4 @@
-import { Provider } from "ethers";
+import { Provider, Signer } from "ethers";
 import { ComedyClashAdapterType } from "../adapters/ComedyClashAdapterType";
 import { Submission } from "../data/submission";
 
@@ -14,12 +14,13 @@ export type ComedyClashRepoType = {
 
 export const ComedyClashRepo = (
     web3Provider: Provider,
-    comedyTheaterAdapterfabric: (web3Provider: Provider, address: string) => ComedyClashAdapterType): ComedyClashRepoType => {
+    signer: Signer | null,
+    comedyTheaterAdapterfabric: (web3Provider: Provider, signer: Signer | null, address: string) => ComedyClashAdapterType): ComedyClashRepoType => {
     const adapters = new Map<string, ComedyClashAdapterType>();
 
     async function getAdapter(address: string): Promise<ComedyClashAdapterType> {
         return adapters.get(address)
-            ?? (adapters.set(address, comedyTheaterAdapterfabric(web3Provider, address)), adapters.get(address) as ComedyClashAdapterType);
+            ?? (adapters.set(address, comedyTheaterAdapterfabric(web3Provider, signer, address)), adapters.get(address) as ComedyClashAdapterType);
     }
 
     return {
