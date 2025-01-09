@@ -79,10 +79,14 @@ export default function CreateShow() {
             try {
                 setLoading(true);
                 setErrorMessage('');
-                
-                await comedyTheaterRepo!!.addShow(description, Number(days));
 
-                if (controller.signal.aborted) return;
+                const txResponse = await comedyTheaterRepo!!.addShow(description, Number(days));
+                setSuccessMessage('Transcation successfully created - waiting for confirmation!');
+                toast.success('Transcation successfully created!');
+
+                console.log('addShow: tx created - waiting for confirmation');
+                await txResponse.wait();
+                console.log('addShow: tx confirmed');
 
                 setSuccessMessage('Show successfully created!');
                 toast.success('Show successfully created!');

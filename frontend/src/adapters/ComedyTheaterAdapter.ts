@@ -15,7 +15,7 @@ export const ComedyTheaterAdapter = (web3Provider: Provider, signer: Signer | nu
     async function getContractForWrite() {
         console.log(`getContractForWrite: web3Provider signers=${signer}`);
         if (!signer) throw new Error("Connection read-only!");
-        
+
         return ComedyTheater__factory.connect(address, signer);
     }
 
@@ -23,7 +23,7 @@ export const ComedyTheaterAdapter = (web3Provider: Provider, signer: Signer | nu
         getShowAmount: async () => (await getContractReadOnly()).getShowAmount(),
         getShowAdress: async (index: number) => (await getContractReadOnly()).shows(index),
         addShow: async (description: string, durationInDays: number) => {
-            (await getContractForWrite()).addShow(description, durationInDays);
+            return (await getContractForWrite()).addShow(description, durationInDays);
         },
         isManager: async () => {
             try {
