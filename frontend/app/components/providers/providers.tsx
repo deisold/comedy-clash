@@ -37,7 +37,7 @@ export function AppProvider({ children }: AppProviderProps) {
         isManager: false
     });
 
-    const { isLoading: blockchainInitLoading, provider, error: blockchainError } = useBlockchainState();
+    const { isLoading: blockchainInitLoading, provider, signer, error: blockchainError } = useBlockchainState();
     console.log(`AppProvider: blockchainInitLoading=${blockchainInitLoading}`);
 
     const useMockData = JSON.parse(process.env.NEXT_PUBLIC_USE_MOCKDATA as string);
@@ -69,7 +69,7 @@ export function AppProvider({ children }: AppProviderProps) {
                 const theaterRepo = ComedyTheaterRepo(
                     useMockData
                         ? MockComedyTheaterAdapter()
-                        : ComedyTheaterAdapter(provider!!, comedyTheaterAddress)
+                        : ComedyTheaterAdapter(provider!!, signer, comedyTheaterAddress)
                 );
 
                 const clashRepo = ComedyClashRepo(
