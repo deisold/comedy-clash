@@ -7,11 +7,10 @@ import { useRouter } from 'next/navigation';
 import ShowListItem from '../showlistitem/showlistitem'
 
 export default function Home() {
-    const { comedyTheaterRepo, isManager: appIsManager } = useAppContext();
+    const { comedyTheaterRepo, isManager } = useAppContext();
     const router = useRouter();
 
     // isManager is true if the user is the manager of the theater (contract) AND can write to the blockchain
-    const [isManager, setIsManager] = useState(false);
     const [showAmount, setShowAmount] = useState<number>(0);
 
     const handleNavigate = () => {
@@ -24,8 +23,6 @@ export default function Home() {
                 const amount: number = await comedyTheaterRepo!!.getShowAmount();
                 console.log(`amount=${amount}`);
                 setShowAmount(amount);
-
-                setIsManager(appIsManager);
             } catch (err) {
                 console.error(err);
             }
