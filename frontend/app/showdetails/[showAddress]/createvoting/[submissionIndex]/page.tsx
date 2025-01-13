@@ -97,6 +97,8 @@ export default function CreateVoting() {
     };
 
     const handleSubmit = async () => {
+        setSubmitted(true);
+        
         if (validate()) {
             setSubmitted(true);
             const controller = new AbortController();
