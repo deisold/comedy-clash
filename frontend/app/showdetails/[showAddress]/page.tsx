@@ -5,7 +5,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/app/components/providers/providers'
 import { Button } from 'semantic-ui-react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 
 import SubmissionListItem from '@/app/components/submission-listitem/submission-listitem'
@@ -21,6 +21,7 @@ interface ShowDetailState {
     description: string;
     submissionCount: number;
     submissions: Submission[];
+    isClosed: boolean;
 }
 
 export default function ShowDetails() {
@@ -32,8 +33,10 @@ export default function ShowDetails() {
         description: '',
         submissionCount: 0,
         submissions: [],
+        isClosed: false,
     });
 
+    const router = useRouter();
     const { showAddress } = useParams<RouteParams>();
 
     const buildOrderedSubmissions = async (submissionCount: number) => {
@@ -47,6 +50,10 @@ export default function ShowDetails() {
             })
         );
         return submissions.sort((a, b) => (a.averageValue < b.averageValue ? 1 : -1));
+    }
+
+    const handleCreateSubmission = () => {
+        router.push(`/showdetails/${showAddress}/createSubmission`);
     }
 
     useEffect(() => {
@@ -67,11 +74,14 @@ export default function ShowDetails() {
                 if (controller.signal.aborted) return;
                 const submissions = await buildOrderedSubmissions(submissionCount);
                 if (controller.signal.aborted) return;
+                const closed = await comedyClashRepo.isClosed(showAddress);
+                if (controller.signal.aborted) return;
 
                 setDetails({
                     description: showDescription,
                     submissionCount: submissionCount,
                     submissions: submissions,
+                    isClosed: closed,
                 });
             }
             catch (err: any) {
@@ -110,6 +120,18 @@ export default function ShowDetails() {
             <div>
                 <h3>Show: {details.description}</h3>
                 <h4>Submissions: {details.submissionCount}</h4>
+                <div>
+                <Button
+                    primary
+                    floated='right'
+                    disabled={details.isClosed}
+                    style={{ display: details.isClosed ? 'none' : undefined }}
+                    onClick={handleCreateSubmission}>
+                    Add Submission
+                </Button>
+
+            </div>
+            <br />
                 <table>
                     <thead>
                         <tr>
