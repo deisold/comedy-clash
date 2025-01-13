@@ -33,7 +33,7 @@ export const ComedyClashRepo = (
         createVotingForSubmission: async (address: string, index: number, voterName: string, comment: string, value: number) =>
             (await getAdapter(address)).createVotingForSubmission(index, voterName, comment, BigInt(value)),
         createSubmissions: async (address: string, name: string, topic: string, preview: string) =>
-            (await getAdapter(address)).createSubmissions(name, topic, preview),
+            (await getAdapter(address)).createSubmission(name, topic, preview),
         closeSubmission: async (address: string) => (await getAdapter(address)).closeSubmission(),
     }
 

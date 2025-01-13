@@ -1,7 +1,7 @@
 import { Provider, Signer } from "ethers";
 import { ComedyClashAdapterType } from "./ComedyClashAdapterType";
 import { Submission } from "../data/submission";
-import { MockTransactionResponse } from "./MockTransactionResponse";
+import { createDelayedMockResponse as createDelayedMockResponse, defaultDelayMS } from "./MockTransactionResponse";
 
 export const MockComedyClashAdapter = (web3Provider: Provider, signer: Signer | null, address: string): ComedyClashAdapterType => {
     let submissions = 3;
@@ -37,18 +37,18 @@ export const MockComedyClashAdapter = (web3Provider: Provider, signer: Signer | 
                 Math.floor(Math.random() * 10)).join('')),
         }),
         createVotingForSubmission: async (index: number, voterName: string, comment: string, value: bigint) => {
-            await delay(1000);
-            return { wait: async () => ({}) } as MockTransactionResponse;
+            await delay(defaultDelayMS);
+            return createDelayedMockResponse();
         },
-        createSubmissions: async (name: string, topic: string, preview: string) => {
+        createSubmission: async (name: string, topic: string, preview: string) => {
             submissions++;
-            await delay(1000);
-            return { wait: async () => ({}) } as MockTransactionResponse;
+            await delay(defaultDelayMS);
+            return createDelayedMockResponse();
         },
         closeSubmission: async () => {
             closed[address] = true;
-            await delay(1000);
-            return { wait: async () => ({}) } as MockTransactionResponse;
+            await delay(defaultDelayMS);
+            return createDelayedMockResponse();
         }
     })
 }

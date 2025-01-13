@@ -1,6 +1,6 @@
 // frontend/src/adapters/MockComedyTheaterAdapter.ts
 import { ComedyTheaterAdapterType } from "./ComedyTheaterAdapterType";
-import { MockTransactionResponse } from "./MockTransactionResponse";
+import { createDelayedMockResponse as createDelayedMockResponse, defaultDelayMS } from "./MockTransactionResponse";
 
 const delay = (ms: number) => {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -12,9 +12,9 @@ export const MockComedyTheaterAdapter = (): ComedyTheaterAdapterType => {
         getShowAmount: async () => amount,
         getShowAdress: async (index: number) => index.toString(),
         addShow: async (description: string, durationInDays: number) => {
-            await delay(1000);
+            await delay(defaultDelayMS);
             amount++;
-            return { wait: async () => ({}) } as MockTransactionResponse;
+            return createDelayedMockResponse();
         },
         isManager: async () => true,
     }

@@ -43,7 +43,7 @@ export const ComedyClashAdapter = (web3Provider: Provider, signer: Signer | null
             return (await getContractForWrite()).createVotingForSubmission(index, voterName, comment, value);
         },
 
-        createSubmissions: async (name: string, topic: string, preview: string): Promise<ContractTransactionResponse> => {
+        createSubmission: async (name: string, topic: string, preview: string): Promise<ContractTransactionResponse> => {
             return (await getContractForWrite()).createSubmissions(name, topic, preview);
         },
 

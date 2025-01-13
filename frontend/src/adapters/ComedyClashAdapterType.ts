@@ -9,6 +9,6 @@ export type ComedyClashAdapterType = {
     getSubmissionCount: () => Promise<bigint>;
     getSubmission: (index: number) => Promise<Submission>;
     createVotingForSubmission: (index: number, voterName: string, comment: string, value: bigint) => Promise<ContractTransactionResponse>;
-    createSubmissions: (name: string, topic: string, preview: string) => Promise<ContractTransactionResponse>;
+    createSubmission: (name: string, topic: string, preview: string) => Promise<ContractTransactionResponse>;
     closeSubmission: () => Promise<ContractTransactionResponse>;
 }
