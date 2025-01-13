@@ -37,7 +37,11 @@ export const MockComedyClashAdapter = (web3Provider: Provider, signer: Signer | 
                 Math.floor(Math.random() * 10)).join('')),
         }),
         createVotingForSubmission: async (index: number, voterName: string, comment: string, value: bigint) => {
-            submissions++
+            await delay(1000);
+            return { wait: async () => ({}) } as MockTransactionResponse;
+        },
+        createSubmissions: async (name: string, topic: string, preview: string) => {
+            submissions++;
             await delay(1000);
             return { wait: async () => ({}) } as MockTransactionResponse;
         },

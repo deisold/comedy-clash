@@ -1,4 +1,4 @@
-import { Provider, Signer } from "ethers";
+import { ContractTransactionResponse, Provider, Signer } from "ethers";
 import { ComedyClashAdapterType } from "../adapters/ComedyClashAdapterType";
 import { Submission } from "../data/submission";
 
@@ -9,7 +9,8 @@ export type ComedyClashRepoType = {
     getSubmissionCount: (address: string) => Promise<number>;
     getSubmission: (address: string, index: number) => Promise<Submission>;
     createVotingForSubmission: (address: string, index: number, voterName: string, comment: string, value: number) => Promise<any>;
-    closeSubmission: (address: string) => Promise<any>;
+    createSubmissions: (address: string, name: string, topic: string, preview: string) => Promise<ContractTransactionResponse>;
+    closeSubmission: (address: string) => Promise<ContractTransactionResponse>;
 }
 
 export const ComedyClashRepo = (
@@ -31,6 +32,8 @@ export const ComedyClashRepo = (
         getSubmission: async (address: string, index: number) => (await getAdapter(address)).getSubmission(index),
         createVotingForSubmission: async (address: string, index: number, voterName: string, comment: string, value: number) =>
             (await getAdapter(address)).createVotingForSubmission(index, voterName, comment, BigInt(value)),
+        createSubmissions: async (address: string, name: string, topic: string, preview: string) =>
+            (await getAdapter(address)).createSubmissions(name, topic, preview),
         closeSubmission: async (address: string) => (await getAdapter(address)).closeSubmission(),
     }
 
