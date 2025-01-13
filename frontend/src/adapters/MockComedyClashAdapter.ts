@@ -1,6 +1,7 @@
 import { Provider, Signer } from "ethers";
 import { ComedyClashAdapterType } from "./ComedyClashAdapterType";
 import { Submission } from "../data/submission";
+import { MockTransactionResponse } from "./MockTransactionResponse";
 
 export const MockComedyClashAdapter = (web3Provider: Provider, signer: Signer | null, address: string): ComedyClashAdapterType => {
     let submissions = 3;
@@ -35,13 +36,15 @@ export const MockComedyClashAdapter = (web3Provider: Provider, signer: Signer | 
             averageValue: BigInt(Math.floor(Math.random() * 401 + 100).toString() + Array(16).fill(0).map(() =>
                 Math.floor(Math.random() * 10)).join('')),
         }),
-        createVotingForSubmission: async (index: number, voterName: string, comment: string, value: bigint): Promise<void> => {
+        createVotingForSubmission: async (index: number, voterName: string, comment: string, value: bigint) => {
             submissions++
             await delay(1000);
+            return { wait: async () => ({}) } as MockTransactionResponse;
         },
         closeSubmission: async () => {
             closed[address] = true;
             await delay(1000);
+            return { wait: async () => ({}) } as MockTransactionResponse;
         }
     })
 }
