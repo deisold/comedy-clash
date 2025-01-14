@@ -7,7 +7,7 @@ import { ethers, Provider, Signer } from 'ethers';
 interface BlockchainStateType {
     provider: Provider | null;
     signer: Signer | null;
-    currentAddress: string | null;
+    walletAddress: string | null;
     networkId: number | null;
     isConnected: boolean;
     canWrite: boolean;
@@ -22,7 +22,7 @@ export function BlockchainStateProvider({ children }: { children: ReactNode }) {
     const [state, setState] = useState<BlockchainStateType>({
         provider: null,
         signer: null,
-        currentAddress: null,
+        walletAddress: null,
         networkId: null,
         isConnected: false,
         canWrite: false,
@@ -37,16 +37,15 @@ export function BlockchainStateProvider({ children }: { children: ReactNode }) {
             const network = await getNetwork(provider);
             const canWrite = isWriteProvider(provider);
             const signer = canWrite ? await getSigner(provider) : null;
-            console.log(`updateBlockchainState: canWrite=${canWrite}, signer=${signer}`);
-
-            let address = null;
+            const walletAddress = signer ? await signer.getAddress() : null;
+            console.log(`updateBlockchainState: canWrite=${canWrite}, signer=${signer}, walletAddress=${walletAddress}`);
 
             setState({
                 provider,
                 signer,
-                currentAddress: address,
+                walletAddress: walletAddress,
                 networkId: network?.chainId ? Number(network.chainId) : null,
-                isConnected: !!address,
+                isConnected: !!walletAddress,
                 canWrite,
                 isLoading: false,
                 error: null
@@ -83,7 +82,7 @@ export function BlockchainStateProvider({ children }: { children: ReactNode }) {
                 ...prev,
                 isConnected: false,
                 canWrite: false,
-                currentAddress: null,
+                walletAddress: null,
                 signer: null
             }));
         };
