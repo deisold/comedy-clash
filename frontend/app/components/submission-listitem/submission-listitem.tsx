@@ -97,9 +97,9 @@ export default function SubmissionListItem({ address, index, submission }: { add
     }, [comedyClashRepo, address, index, submission]);
 
     const handleNavigate = () => {
-        console.log(`SubmissionListItem: submission address:${address}`);
+        console.log(`SubmissionListItem: submission address:${address}, index:${index}`);
 
-        router.push(`/showdetails/${showAddress}/createvoting/${address}`);
+        router.push(`/showdetails/${showAddress}/createvoting/${index}`);
     };
 
     let content;
