@@ -22,7 +22,7 @@ interface ListItemData {
     loading: boolean;
     id: number;
     isClosed: boolean;
-    artistAddress: string;
+    isVotable: boolean;
     name: string;
     topic: string;
     preview: string;
@@ -33,14 +33,14 @@ interface ListItemData {
 
 export default function SubmissionListItem({ address, index, submission }: { address: string, index: number, submission: Submission }) {
     const { comedyClashRepo } = useAppContext();
-    const { canWrite } = useBlockchainState();
+    const { canWrite, walletAddress } = useBlockchainState();
     const router = useRouter();
 
     const [data, setData] = useState<ListItemData>({
         loading: true,
         id: 0,
         isClosed: false,
-        artistAddress: '',
+        isVotable: false,
         name: '',
         topic: '',
         preview: '',
@@ -53,6 +53,8 @@ export default function SubmissionListItem({ address, index, submission }: { add
     const { showAddress } = useParams<RouteParams>();
 
     useEffect(() => {
+        console.log(`SubmissionListItem: submission.artist=${submission.artistAddress}`);
+
         const init = async () => {
             try {
                 if (comedyClashRepo == null || showAddress == null) {
@@ -76,6 +78,7 @@ export default function SubmissionListItem({ address, index, submission }: { add
                     loading: false,
                     id: submission.id,
                     isClosed: isClosed,
+                    isVotable: walletAddress != submission.artistAddress,
                     name: submission.name,
                     topic: submission.topic,
                     preview: submission.preview,
@@ -119,7 +122,7 @@ export default function SubmissionListItem({ address, index, submission }: { add
                 <td>
                     {!data.isClosed && (
                         <Button basic
-                            disabled={data.loading || !canWrite}
+                            disabled={data.loading || !canWrite || !data.isVotable}
                             onClick={handleNavigate}>
                             Vote
                         </Button>
