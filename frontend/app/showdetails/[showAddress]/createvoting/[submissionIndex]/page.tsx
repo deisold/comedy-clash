@@ -2,13 +2,13 @@
 
 "use client"
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useAppContext } from '@/app/components/providers/providers'
 import { FormInput, Form, Button } from 'semantic-ui-react';
 import { useRouter, useParams } from 'next/navigation';
-import { toast } from 'react-toastify';
-import { InputChangeEvent } from '@/app/source/common/CommonTypes';
 import _ from 'lodash';
+import { useCreateRatingViewModel } from '../CreateRatingViewModel';
+import { useEventEmitter } from '@/app/components/ui/useToastEventEmitter';
 
 interface RouteParams {
     showAddress: string;
@@ -17,129 +17,14 @@ interface RouteParams {
     [key: string]: string | undefined;
 }
 
-interface ErrorMessages {
-    name: string;
-    comment: string;
-    value: string;
-}
-
 export default function CreateVoting() {
     const { comedyClashRepo } = useAppContext();
     const router = useRouter();
-
     const { showAddress, submissionIndex } = useParams<RouteParams>();
 
-    const [name, setName] = useState('');
-    const [comment, setComment] = useState('');
-    const [value, setValue] = useState('');
+    const { state, actions, eventEmitter } = useCreateRatingViewModel(showAddress, submissionIndex);
 
-    const [loading, setLoading] = useState(false);
-    // State for validation errors
-    const [errors, setErrors] = useState<ErrorMessages>({
-        name: '',
-        comment: '',
-        value: '',
-    });
-    const [submitted, setSubmitted] = useState(false);
-
-    const [successMessage, setSuccessMessage] = useState('');
-
-    const [errorMessage, setErrorMessage] = useState('');
-
-    const onChangeName = (e: InputChangeEvent) => {
-        setName(e.target.value)
-        setErrorMessage('')
-
-        if (errors.name) {
-            setErrors((prevErrors) => ({ ...prevErrors, name: '' }));
-            setSubmitted(false);
-        }
-    }
-
-    const onChangeComment = (e: InputChangeEvent) => {
-        setComment(e.target.value)
-        setErrorMessage('')
-
-        if (errors.comment) {
-            setErrors((prevErrors) => ({ ...prevErrors, comment: '' }));
-            setSubmitted(false);
-        }
-    }
-
-    const onChangeValue = (e: InputChangeEvent) => {
-        setValue(e.target.value)
-        setErrorMessage('')
-
-        if (errors.value) {
-            setErrors((prevErrors) => ({ ...prevErrors, value: '' }));
-            setSubmitted(false);
-        }
-    }
-
-    const validate = () => {
-        const newErrors: ErrorMessages = {
-            name: '',
-            comment: '',
-            value: '',
-        };
-        if (!name) newErrors.name = 'Please enter your name';
-        if (!comment) newErrors.comment = 'Please enter a comment';
-        if (!value) {
-            newErrors.value = 'Please enter a value';
-        } else if (Number(value) < 1) {
-            newErrors.value = 'At least 1 points';
-        } else if (Number(value) > 5) {
-            newErrors.value = 'Not more than 5 points';
-        }
-        setErrors(newErrors);
-
-        return Object.values(newErrors).every(value => value === '');
-    };
-
-    const handleSubmit = async () => {
-        setSubmitted(true);
-        
-        if (validate()) {
-            setSubmitted(true);
-            const controller = new AbortController();
-
-            try {
-                const isValidNumber = _.isFinite(_.toNumber(submissionIndex));
-                if (comedyClashRepo == null || showAddress == null || !isValidNumber) {
-                    throw new Error('ShowDetails: dependencies null');
-                }
-
-                setLoading(true);
-                setErrorMessage('');
-
-                await comedyClashRepo.createVotingForSubmission(
-                    showAddress, Number(submissionIndex), name, comment, _.toNumber(value)
-                );
-
-                if (controller.signal.aborted) return;
-
-                setSuccessMessage('Voting successfully sent.');
-                toast.success('Voting successfully sent!');
-            } catch (error: unknown) {
-                setSubmitted(false);
-                if (controller.signal.aborted) return;
-
-                if (error instanceof Error) {
-                    console.error('Error creating voting:', error);
-                    toast.error(error.message || 'Failed to submit voting. Please try again.');
-                    setErrorMessage(error.message || 'Failed to submit voting. Please try again.');
-                } else {
-                    console.error('An unknown error occurred');
-                }
-            } finally {
-                if (!controller.signal.aborted) {
-                    setLoading(false);
-                }
-            }
-
-            return () => controller.abort();
-        }
-    };
+    useEventEmitter(eventEmitter);
 
     const handleBack = async () => {
         router.back();
@@ -152,48 +37,48 @@ export default function CreateVoting() {
             <br />
             <Form>
                 <FormInput
-                    error={submitted && errors.name ? { content: errors.name, pointing: 'below' } : null}
+                    error={state.submitted && state.errors.name ? { content: state.errors.name, pointing: 'below' } : null}
                     fluid
                     label='Name'
                     placeholder='Whats your name?'
                     id='form-input-name'
                     type='text'
-                    value={name}
-                    onChange={onChangeName}
+                    value={state.name}
+                    onChange={actions.onChangeName}
                 />
                 <FormInput
-                    error={submitted && errors.comment ? { content: errors.comment } : null}
+                    error={state.submitted && state.errors.comment ? { content: state.errors.comment } : null}
                     fluid
                     label='Comment'
                     placeholder='Whats your comment?'
                     id='form-input-comment'
                     type='text'
-                    value={comment}
-                    onChange={onChangeComment}
+                    value={state.comment}
+                    onChange={actions.onChangeComment}
                 />
                 <FormInput
-                    error={submitted && errors.value ? { content: errors.value } : null}
+                    error={state.submitted && state.errors.value ? { content: state.errors.value } : null}
                     fluid
-                    label='Value beween 1 and 5'
-                    placeholder='How many days?'
+                    label='Your rating'
+                    placeholder='Value beween 1 and 5'
                     type='number'
-                    value={value}
-                    onChange={onChangeValue}
+                    value={state.value}
+                    onChange={actions.onChangeValue}
                 />
-                {!successMessage &&
+                {!state.successMessage &&
                     <Button
-                        loading={loading}
-                        disabled={loading || Boolean(successMessage)}
-                        onClick={handleSubmit}>
+                        loading={state.loading}
+                        disabled={state.loading || Boolean(state.successMessage)}
+                        onClick={actions.onSubmit}>
                         Submit
                     </Button>
                 }
             </Form>
 
-            {successMessage &&
+            {state.successMessage &&
                 <div>
                     <br />
-                    <p>{successMessage}</p>
+                    <p>{state.successMessage}</p>
                     <Button
                         primary
                         onClick={handleBack}>
@@ -201,9 +86,9 @@ export default function CreateVoting() {
                     </Button>
                 </div>}
             {/* Show inline error if present */}
-            {errorMessage && (
+            {state.errorMessage && (
                 <div className="error-message text-red-600 mb-4">
-                    {errorMessage}
+                    {state.errorMessage}
                 </div>
             )}
         </div>
