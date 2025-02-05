@@ -1,8 +1,9 @@
 import { useAppContext } from '@/app/components/providers/providers';
-import { validateShowInputUseCase, ShowInputErrorMessages } from '@/app/createShow/useCases/ValidateShowInput';
-import { useState, useRef, useEffect } from 'react';
+import { validateShowInputUseCase, ShowInputErrorMessages, hasNoErrors } from '@/app/createShow/useCases/ValidateShowInput';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { ViewModelEventEmitter } from '@/app/source/common/CommonEvents';
 import { InputChangeEvent } from '../source/common/CommonTypes';
+import { useTxUseCase, TxUseCaseState, TxUseCaseStateEnum } from '../source/useCase/useTxUseCase';
 
 export interface CreateShowState {
     description: string;
@@ -29,7 +30,15 @@ export interface CreateShowViewModelActions {
 export const useCreateShowViewModel = () => {
     const { comedyTheaterRepo, isManager: appIsManager } = useAppContext();
     const eventEmitter = useRef(new ViewModelEventEmitter()).current;
-    const abortControllerRef = useRef<AbortController | null>(null); // Ref to store the current AbortController
+
+    const {
+        state: addShowTxState,
+        start: addShowTxStart,
+        abortControllerRef: addShowTxAbortControllerRef
+    } = useTxUseCase(
+        'CreateShowViewModel::addShow',
+        () => comedyTheaterRepo!!.addShow(state.description, Number(state.days)),
+    );
 
     const [state, setState] = useState<CreateShowState>({
         description: '',
@@ -47,6 +56,35 @@ export const useCreateShowViewModel = () => {
             setState(prevState => ({ ...prevState, errorMessage: 'You are not authorized to create a show' }));
         }
     }, [appIsManager]);
+
+    // Function to handle transaction state changes
+    const handleTransactionStateChange = (state: TxUseCaseState) => {
+        const { msg } = state;
+        switch (state.state) {
+            case TxUseCaseStateEnum.Launched:
+                setState(prevState => ({ ...prevState, loading: true }));
+                break;
+            case TxUseCaseStateEnum.TxCreated:
+            case TxUseCaseStateEnum.TxConfirmed:
+                setState(prevState => ({
+                    ...prevState, successMessage: msg,
+                    loading: state.state === TxUseCaseStateEnum.TxConfirmed ? false : prevState.loading
+                }));
+                eventEmitter.emit('success', { type: 'success', message: msg });
+                break;
+            case TxUseCaseStateEnum.Error:
+                setState(prevState => ({ ...prevState, errorMessage: msg, loading: false }));
+                eventEmitter.emit('error', { type: 'error', message: msg });
+                break;
+            default:
+                break;
+        }
+    };
+
+    // Handle the transaction state from the txUseCase
+    useEffect(() => {
+        handleTransactionStateChange(addShowTxState);
+    }, [addShowTxState]);
 
     const actions: CreateShowViewModelActions = {
         onChangeDescription: (e: InputChangeEvent) => {
@@ -72,43 +110,14 @@ export const useCreateShowViewModel = () => {
             const errors: ShowInputErrorMessages = validateShowInputUseCase(state.description, state.days);
             setState(prevState => ({ ...prevState, errors }));
 
-            if (Object.values(errors).every(value => value === '')) {
-                abortControllerRef.current?.abort();
-                abortControllerRef.current = new AbortController();
-
-                try {
-                    setState(prevState => ({ ...prevState, loading: true, errorMessage: '' }));
-
-                    const txResponse = await comedyTheaterRepo!!.addShow(state.description, Number(state.days));
-                    var message = 'Transcation successfully created - waiting for confirmation!';
-                    setState(prevState => ({ ...prevState, successMessage: message }));
-                    eventEmitter.emit('success', { type: 'success', message: message });
-
-                    console.log(`CreateShowViewModel: addShow: ${message}`);
-
-                    await txResponse.wait();
-
-                    message = 'Transaction confirmed!';
-                    setState(prevState => ({ ...prevState, successMessage: message }));
-                    eventEmitter.emit('success', { type: 'success', message: message });
-                    console.log(`CreateShowViewModel: addShow: ${message}`);
-                } catch (error: any) {
-                    if (abortControllerRef.current?.signal.aborted) return;
-                    eventEmitter.emit('error', { type: 'error', message: 'Error creating show!' });
-                    console.error('CreateShowViewModel: Error creating show:', error);
-                    setState(prevState => ({
-                        ...prevState, errorMessage: error.message
-                            || 'Failed to create show. Please try again.'
-                    }));
-                } finally {
-                    if (abortControllerRef.current?.signal.aborted) return;
-                    setState(prevState => ({ ...prevState, loading: false }));
-                }
-
-                return () => abortControllerRef.current?.abort();
+            if (hasNoErrors(errors)) {
+                // Start the transaction use case
+                addShowTxStart();
+                return () => addShowTxAbortControllerRef.current?.abort();
             }
         }
     };
 
     return { state, actions, eventEmitter };
 };
+

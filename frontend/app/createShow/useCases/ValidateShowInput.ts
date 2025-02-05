@@ -25,3 +25,6 @@ export const validateShowInputUseCase = (
     return errors;
 };
 
+export const hasNoErrors = (errors: ShowInputErrorMessages): boolean =>
+    Object.values(errors).every(value => value === '');
+
