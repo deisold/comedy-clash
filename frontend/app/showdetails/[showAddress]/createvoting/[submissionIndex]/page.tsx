@@ -3,7 +3,6 @@
 "use client"
 
 import React from 'react';
-import { useAppContext } from '@/app/components/providers/providers'
 import { FormInput, Form, Button } from 'semantic-ui-react';
 import { useRouter, useParams } from 'next/navigation';
 import _ from 'lodash';
@@ -18,7 +17,6 @@ interface RouteParams {
 }
 
 export default function CreateVoting() {
-    const { comedyClashRepo } = useAppContext();
     const router = useRouter();
     const { showAddress, submissionIndex } = useParams<RouteParams>();
 
