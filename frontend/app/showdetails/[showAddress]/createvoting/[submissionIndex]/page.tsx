@@ -24,9 +24,7 @@ export default function CreateVoting() {
 
     useEventEmitter(eventEmitter);
 
-    const handleBack = async () => {
-        router.back();
-    }
+    const handleBack = async () => { router.back(); }
 
     return (
         <div>

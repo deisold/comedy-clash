@@ -1,64 +1,60 @@
-import { useAppContext } from '@/app/components/providers/providers';
-import { validateRatingInputUseCase, RatingInputErrorMessages } from './useCases/ValidateRatingInput';
-import { useState, useRef, useEffect } from 'react';
-import { ViewModelEventEmitter } from '@/app/source/common/CommonEvents';
-import { useBlockchainState } from '@/app/components/providers/BlockchainStateProvider';
-import _ from 'lodash';
-import { InputChangeEvent } from '@/app/source/common/CommonTypes';
-import { TxUseCaseState, TxUseCaseStateEnum, useTxUseCase } from '@/app/source/useCase/useTxUseCase';
-import { hasNoErrors } from '@/app/source/utils/utils';
+import { useEffect, useRef, useState } from "react";
+import { SubmissionInputErrorMessages, validateSubmissionInputUseCase } from "./useCases/ValidateRatingInput";
+import { useBlockchainState } from "@/app/components/providers/BlockchainStateProvider";
+import { TxUseCaseState, TxUseCaseStateEnum, useTxUseCase } from "@/app/source/useCase/useTxUseCase";
+import { useAppContext } from "@/app/components/providers/providers";
+import { InputChangeEvent } from "@/app/source/common/CommonTypes";
+import { ViewModelEventEmitter } from "@/app/source/common/CommonEvents";
+import { hasNoErrors } from "@/app/source/utils/utils";
 //
-export interface CreateRatingState {
+export interface CreateSubmissionState {
     name: string;
-    comment: string;
-    value: string;
+    topic: string;
+    preview: string;
     loading: boolean;
     successMessage: string;
     errorMessage: string;
-    errors: RatingInputErrorMessages;
+    errors: SubmissionInputErrorMessages;
     submitted: boolean;
     canWrite: boolean;
 }
 
-export interface CreateRatingViewModelActions {
+export interface CreateSubmissionViewModelActions {
     onChangeName: (e: InputChangeEvent) => void;
-    onChangeComment: (e: InputChangeEvent) => void;
-    onChangeValue: (e: InputChangeEvent) => void;
+    onChangeTopic: (e: InputChangeEvent) => void;
+    onChangePreview: (e: InputChangeEvent) => void;
     onSubmit: () => void;
 }
 
-export const useCreateRatingViewModel = (showAddress: string, submissionIndex: string) => {
+export const useCreateSubmissionViewModel = (showAddress: string) => {
     const { canWrite } = useBlockchainState();
     const { comedyClashRepo } = useAppContext();
     const eventEmitter = useRef(new ViewModelEventEmitter()).current;
 
-    const isValidNumber = _.isFinite(_.toNumber(submissionIndex));
-    if (comedyClashRepo == null || showAddress == null || !isValidNumber) {
-        throw new Error('CreateRatingViewModel: dependencies null');
-    }
-
-    const {
-        state: createVotingForSubmissionTxState,
-        start: createVotingForSubmissionTxStart,
-        abortControllerRef: createVotingForSubmissionTxAbortControllerRef
-    } = useTxUseCase(
-        'CreateRatingViewModel::createVotingForSubmission',
-        () => comedyClashRepo.createVotingForSubmission(
-            showAddress, Number(submissionIndex), state.name, state.comment, _.toNumber(state.value)
-        ),
-    );
-
-    const [state, setState] = useState<CreateRatingState>({
+    const [state, setState] = useState<CreateSubmissionState>({
         name: '',
-        comment: '',
-        value: '',
+        topic: '',
+        preview: '',
         loading: false,
         successMessage: '',
         errorMessage: '',
-        errors: { name: '', comment: '', value: '' },
+        errors: {
+            name: '',
+            topic: '',
+            preview: '',
+        },
         submitted: false,
         canWrite: canWrite
     });
+
+    const {
+        state: createSubmissionTxState,
+        start: createSubmissionTxStart,
+        abortControllerRef: createSubmissionTxAbortControllerRef
+    } = useTxUseCase(
+        'CreateSubmissionViewModel::createSubmission',
+        () => comedyClashRepo!!.createSubmissions(showAddress, state.name, state.topic, state.preview),
+    );
 
     // Function to handle transaction state changes
     const handleTransactionStateChange = (state: TxUseCaseState) => {
@@ -86,10 +82,10 @@ export const useCreateRatingViewModel = (showAddress: string, submissionIndex: s
 
     // Handle the transaction state from the txUseCase
     useEffect(() => {
-        handleTransactionStateChange(createVotingForSubmissionTxState);
-    }, [createVotingForSubmissionTxState]);
+        handleTransactionStateChange(createSubmissionTxState);
+    }, [createSubmissionTxState]);
 
-    const actions: CreateRatingViewModelActions = {
+    const actions: CreateSubmissionViewModelActions = {
         onChangeName: (e: InputChangeEvent) => {
             setState(prevState => ({
                 ...prevState,
@@ -99,20 +95,20 @@ export const useCreateRatingViewModel = (showAddress: string, submissionIndex: s
                 submitted: false
             }));
         },
-        onChangeComment: (e: InputChangeEvent) => {
+        onChangeTopic: (e: InputChangeEvent) => {
             setState(prevState => ({
                 ...prevState,
-                comment: e.target.value,
-                errors: { ...prevState.errors, comment: '' },
+                topic: e.target.value,
+                errors: { ...prevState.errors, topic: '' },
                 errorMessage: '',
                 submitted: false
             }));
         },
-        onChangeValue: (e: InputChangeEvent) => {
+        onChangePreview: (e: InputChangeEvent) => {
             setState(prevState => ({
                 ...prevState,
-                value: e.target.value,
-                errors: { ...prevState.errors, value: '' },
+                preview: e.target.value,
+                errors: { ...prevState.errors, preview: '' },
                 errorMessage: '',
                 submitted: false
             }));
@@ -120,15 +116,15 @@ export const useCreateRatingViewModel = (showAddress: string, submissionIndex: s
         onSubmit: async () => {
             setState(prevState => ({ ...prevState, submitted: true }));
 
-            const errors: RatingInputErrorMessages = validateRatingInputUseCase(state.name, state.comment, state.value);
+            const errors: SubmissionInputErrorMessages = validateSubmissionInputUseCase(state.name, state.topic, state.preview);
             setState(prevState => ({ ...prevState, errors }));
 
             if (hasNoErrors(errors)) {
-                createVotingForSubmissionTxStart();
-                return () => createVotingForSubmissionTxAbortControllerRef.current?.abort();
+                createSubmissionTxStart();
+                return () => createSubmissionTxAbortControllerRef.current?.abort();
             }
         }
     };
 
     return { state, actions, eventEmitter };
-};
+}
