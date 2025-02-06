@@ -1,4 +1,6 @@
-export interface ShowInputErrorMessages {
+import { BaseErrorMessage } from "@/app/source/common/BaseErrorMessage";
+
+export interface ShowInputErrorMessages extends BaseErrorMessage {
     description: string;
     days: string;
 }
@@ -24,7 +26,4 @@ export const validateShowInputUseCase = (
 
     return errors;
 };
-
-export const hasNoErrors = (errors: ShowInputErrorMessages): boolean =>
-    Object.values(errors).every(value => value === '');
 

@@ -1,4 +1,6 @@
-export interface RatingInputErrorMessages {
+import { BaseErrorMessage } from "@/app/source/common/BaseErrorMessage";
+
+export interface RatingInputErrorMessages extends BaseErrorMessage {
     name: string;
     comment: string;
     value: string;

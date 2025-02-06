@@ -1,9 +1,10 @@
 import { useAppContext } from '@/app/components/providers/providers';
-import { validateShowInputUseCase, ShowInputErrorMessages, hasNoErrors } from '@/app/createShow/useCases/ValidateShowInput';
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { validateShowInputUseCase, ShowInputErrorMessages } from '@/app/createShow/useCases/ValidateShowInput';
+import { useState, useRef, useEffect } from 'react';
 import { ViewModelEventEmitter } from '@/app/source/common/CommonEvents';
 import { InputChangeEvent } from '../source/common/CommonTypes';
 import { useTxUseCase, TxUseCaseState, TxUseCaseStateEnum } from '../source/useCase/useTxUseCase';
+import { hasNoErrors } from '@/app/source/utils/utils';
 
 export interface CreateShowState {
     description: string;

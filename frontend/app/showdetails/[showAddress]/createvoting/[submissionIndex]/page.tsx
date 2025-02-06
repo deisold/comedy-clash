@@ -7,7 +7,7 @@ import { useAppContext } from '@/app/components/providers/providers'
 import { FormInput, Form, Button } from 'semantic-ui-react';
 import { useRouter, useParams } from 'next/navigation';
 import _ from 'lodash';
-import { useCreateRatingViewModel } from '../CreateRatingViewModel';
+import { useCreateRatingViewModel } from './CreateRatingViewModel';
 import { useEventEmitter } from '@/app/components/ui/useToastEventEmitter';
 
 interface RouteParams {
