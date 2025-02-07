@@ -3,10 +3,11 @@
 "use client"
 
 import React from 'react';
-import { FormInput, Form, Button } from 'semantic-ui-react';
 import { useRouter } from 'next/navigation';
 import { useEventEmitter } from '../components/ui/useToastEventEmitter';
 import { useCreateShowViewModel } from './CreateShowViewModel';
+import InputField from '../components/ui/InputField';
+import { buttonClassNameListCTA } from '../components/ui/styles/buttonClassNames';
 
 export default function CreateShow() {
     const router = useRouter();
@@ -25,37 +26,34 @@ export default function CreateShow() {
                 <h3 className="text-xl">Create a new show</h3>
             </header>
 
-            <Form className="space-y-4">
-                <FormInput
-                    disabled={state.loading || Boolean(state.successMessage)}
-                    error={state.submitted && state.errors.description ? { content: state.errors.description, pointing: 'below' } : null}
-                    fluid
-                    label='Description'
-                    placeholder='How you wanna call the show?'
-                    id='form-input-description'
-                    type='text'
+            <form className="space-y-4 w-1/2">
+                <InputField
                     value={state.description}
-                    onChange={actions.onChangeDescription}
-                />
-                <FormInput
                     disabled={state.loading || Boolean(state.successMessage)}
-                    error={state.submitted && state.errors.days ? { content: state.errors.days } : null}
-                    fluid
-                    label='Submission window'
-                    placeholder='How many days?'
-                    type='number'
-                    value={state.days}
-                    onChange={actions.onChangeDays}
+                    submitted={state.submitted}
+                    error={state.errors.description}
+                    placeholder="What's your description?"
+                    onChangeEvent={actions.onChangeDescription}
+                    label="Description"
                 />
-                {!state.successMessage &&
-                    <Button
-                        loading={state.loading}
-                        disabled={state.loading || Boolean(state.successMessage) || !state.isManager}
-                        onClick={actions.onSubmit}>
-                        Submit
-                    </Button>
-                }
-            </Form>
+                <InputField
+                    value={state.days}
+                    disabled={state.loading || Boolean(state.successMessage)}
+                    submitted={state.submitted}
+                    error={state.errors.days}
+                    placeholder="How many days?"
+                    onChangeEvent={actions.onChangeDays}
+                    label="Submission window"
+                />
+                {/* TODO: Add LOADING INDICATOR */}
+                <button
+                    type="button"
+                    className="mt-4 rounded-md bg-blue-500 px-4 py-2 text-white shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    onClick={actions.onSubmit}
+                    disabled={state.loading || Boolean(state.successMessage) || !state.isManager}>
+                    Submit
+                </button>
+            </form>
 
             {state.successMessage &&
                 <div>
@@ -63,11 +61,12 @@ export default function CreateShow() {
                     <div className="success-message text-green-600 mt-4">
                         {state.successMessage}
                     </div>
-                    <Button
-                        primary
+                    <button
+                        type="button"
+                        className={buttonClassNameListCTA(state.loading)}
                         onClick={handleBack}>
                         Back
-                    </Button>
+                    </button>
                 </div>}
 
             {state.errorMessage && (

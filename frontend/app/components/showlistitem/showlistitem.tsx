@@ -3,10 +3,11 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 import { useAppContext } from '@/app/components/providers/providers';
-import { Button } from 'semantic-ui-react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-
+import RetryButton from '../ui/RetryButton';
+import { buttonClassNameListCTA, buttonStyleCTAClassName } from '../ui/styles/buttonClassNames';
+//
 interface ShowDetailsState {
     address: string | null;
     description: string | null;
@@ -111,12 +112,7 @@ export default function ShowListItem({ index }: { index: number }) {
                     <div className="text-red-600 mb-2">
                         Error: {errorMessage}
                     </div>
-                    <Button
-                        basic
-                        size='small'
-                        onClick={() => window.location.reload()}>
-                        Try Again
-                    </Button>
+                    <RetryButton onClick={() => window.location.reload()} />
                 </td>
             </tr>
         );
@@ -128,20 +124,23 @@ export default function ShowListItem({ index }: { index: number }) {
             <td>{showDetails.description}</td>
             <td>{showDetails.submissionCount}</td>
             <td>
-                <Button basic
+                <button
+                    className={buttonClassNameListCTA(showDetails.isClosed)}
                     disabled={showDetails.address == null}
                     onClick={handleNavigate}>
                     Show
-                </Button>
+                </button>
                 {!showDetails.isClosed && (
-                    <Button basic
+                    <button
+                        className={buttonClassNameListCTA(isClosing)}
                         disabled={showDetails.address == null || isClosing}
-                        loading={isClosing}
                         onClick={handleClose}>
-                        Close
-                    </Button>
+                        {isClosing ? 'Closing...' : 'Close'}
+                    </button>
                 )}
             </td>
         </tr>
     );
 }
+
+

@@ -6,11 +6,11 @@ import React from 'react';
 import { useEffect, useState } from 'react';
 
 import { useAppContext } from '@/app/components/providers/providers';
-import { Button } from 'semantic-ui-react';
 import { useRouter, useParams } from 'next/navigation';
 import { useBlockchainState } from '../providers/BlockchainStateProvider';
 import { Submission } from '@/app/source/data/submission';
 import { isNotNullOrEmpty } from '@/app/source/utils/utils';
+import { buttonClassNameListCTA } from '../ui/styles/buttonClassNames';
 
 interface RouteParams {
     showAddress: string;
@@ -112,6 +112,7 @@ export default function SubmissionListItem({ address, index, submission }: { add
     } else if (isNotNullOrEmpty(errorMessage)) {
         content = <tr><td>Error: {errorMessage}</td></tr>;
     } else {
+        const isDisabled = data.loading || !canWrite || !data.isVotable;
         content = (
             <tr >
                 <td>{data.name}</td>
@@ -121,11 +122,12 @@ export default function SubmissionListItem({ address, index, submission }: { add
                 <td>{data.averageValue}</td>
                 <td>
                     {!data.isClosed && (
-                        <Button basic
-                            disabled={data.loading || !canWrite || !data.isVotable}
+                        <button
+                            className={buttonClassNameListCTA(isDisabled)}
+                            disabled={isDisabled}
                             onClick={handleNavigate}>
                             Vote
-                        </Button>
+                        </button>
                     )}
                 </td>
             </tr >

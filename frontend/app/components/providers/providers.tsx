@@ -9,6 +9,7 @@ import { ComedyClashAdapter } from '../../source/adapters/ComedyClashAdapter';
 import { MockComedyClashAdapter } from '../../source/adapters/MockComedyClashAdapter';
 import { ComedyClashRepo, ComedyClashRepoType } from '../../source/repositories/ComedyClashRepo';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
+import RetryButton from '../ui/RetryButton';
 
 interface AppContextType {
     comedyTheaterRepo: ComedyTheaterRepoType | null;
@@ -116,13 +117,7 @@ export function AppProvider({ children }: AppProviderProps) {
                 <div className="text-red-500 mb-4" >
                     {state.error.toString()}
                 </div>
-                < button
-                    onClick={() => window.location.reload()
-                    }
-                    className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                >
-                    Retry
-                </button>
+                <RetryButton onClick={() => window.location.reload()}/>
             </div>
         );
     }

@@ -4,12 +4,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '@/app/components/providers/providers'
-import { Button } from 'semantic-ui-react';
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
-
 import SubmissionListItem from '@/app/components/submission-listitem/submission-listitem'
 import { Submission } from '@/app/source/data/submission';
+import RetryButton from '@/app/components/ui/RetryButton';
 
 interface RouteParams {
     showAddress: string;
@@ -110,9 +109,13 @@ export default function ShowDetails() {
         content = (
             <div className="error-container">
                 <p className="text-red-600">Error: {error}</p>
-                <Button onClick={() => window.location.reload()}>
-                    Try Again
-                </Button>
+                <RetryButton
+                    onClick={() => {
+                        // TODO: Add page refresh
+                        setError('');
+                        setLoading(true);
+                    }}
+                />
             </div>
         );
     } else {
@@ -121,15 +124,16 @@ export default function ShowDetails() {
                 <h3>Show: {details.description}</h3>
                 <h4>Submissions: {details.submissionCount}</h4>
                 <div>
-                <Button
-                    primary
-                    floated='right'
-                    disabled={details.isClosed}
-                    style={{ display: details.isClosed ? 'none' : undefined }}
-                    onClick={handleCreateSubmission}>
-                    Add Submission
-                </Button>
 
+                <button
+                    type="button"
+                    className={`bg-blue-500 border border-gray-300 text-gray-700 py-2 px-4 rounded float-right `}
+                    onClick={handleCreateSubmission}
+                    style={{ display: details.isClosed ? 'none' : undefined }}
+                    disabled={details.isClosed}>
+                    Add Submission
+                </button>       
+                
             </div>
             <br />
                 <table>

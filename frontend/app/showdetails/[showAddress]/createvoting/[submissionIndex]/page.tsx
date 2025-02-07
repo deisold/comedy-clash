@@ -3,12 +3,13 @@
 "use client"
 
 import React from 'react';
-import { FormInput, Form, Button } from 'semantic-ui-react';
 import { useRouter, useParams } from 'next/navigation';
 import _ from 'lodash';
 import { useCreateRatingViewModel } from './CreateRatingViewModel';
 import { useEventEmitter } from '@/app/components/ui/useToastEventEmitter';
-
+import InputField from '@/app/components/ui/InputField';
+import { buttonClassNameListCTA } from '@/app/components/ui/styles/buttonClassNames';
+//
 interface RouteParams {
     showAddress: string;
     submissionIndex: string;
@@ -31,55 +32,50 @@ export default function CreateVoting() {
             <h1>Comedy Clash - Your voting matters!</h1>
             <h3>Leave your rating on submission:</h3>
             <br />
-            <Form>
-                <FormInput
-                    error={state.submitted && state.errors.name ? { content: state.errors.name, pointing: 'below' } : null}
-                    fluid
-                    label='Name'
-                    placeholder='Whats your name?'
-                    id='form-input-name'
-                    type='text'
+            <form className="space-y-4 w-1/2">
+                <InputField
                     value={state.name}
-                    onChange={actions.onChangeName}
+                    submitted={state.submitted}
+                    error={state.errors.name}
+                    placeholder="What's your name?"
+                    onChangeEvent={actions.onChangeName}
+                    label="Name"
                 />
-                <FormInput
-                    error={state.submitted && state.errors.comment ? { content: state.errors.comment } : null}
-                    fluid
-                    label='Comment'
-                    placeholder='Whats your comment?'
-                    id='form-input-comment'
-                    type='text'
+                <InputField
                     value={state.comment}
-                    onChange={actions.onChangeComment}
+                    submitted={state.submitted}
+                    error={state.errors.comment}
+                    placeholder="What's your comment?"
+                    onChangeEvent={actions.onChangeComment}
+                    label="Comment"
                 />
-                <FormInput
-                    error={state.submitted && state.errors.value ? { content: state.errors.value } : null}
-                    fluid
-                    label='Your rating'
-                    placeholder='Value beween 1 and 5'
-                    type='number'
+                <InputField
                     value={state.value}
-                    onChange={actions.onChangeValue}
+                    submitted={state.submitted}
+                    error={state.errors.value}
+                    placeholder="Value beween 1 and 5"
+                    onChangeEvent={actions.onChangeValue}
+                    label="Your rating"
                 />
-                {!state.successMessage &&
-                    <Button
-                        loading={state.loading}
-                        disabled={state.loading || Boolean(state.successMessage)}
-                        onClick={actions.onSubmit}>
-                        Submit
-                    </Button>
-                }
-            </Form>
+                <button
+                    type="button"
+                    className="mt-4 rounded-md bg-blue-500 px-4 py-2 text-white shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    onClick={actions.onSubmit}
+                    disabled={state.loading || Boolean(state.successMessage)}>
+                    Submit
+                </button>
+            </form>
 
             {state.successMessage &&
                 <div>
                     <br />
                     <p>{state.successMessage}</p>
-                    <Button
-                        primary
+                    <button
+                        type="button"
+                        className={buttonClassNameListCTA(state.loading || Boolean(state.successMessage))}
                         onClick={handleBack}>
                         Back
-                    </Button>
+                    </button>
                 </div>}
             {/* Show inline error if present */}
             {state.errorMessage && (

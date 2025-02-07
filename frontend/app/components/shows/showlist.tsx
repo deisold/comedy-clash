@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useAppContext } from '@/app/components/providers/providers';
-import { Button } from 'semantic-ui-react';
 import { useRouter } from 'next/navigation';
 import ShowListItem from '../showlistitem/showlistitem'
 
@@ -35,14 +34,13 @@ export default function Home() {
         <div>
             <div>
                 <h2>The number of shows: {showAmount}</h2>
-                <Button
-                    primary
-                    floated='right'
-                    style={{ display: !isManager ? 'none' : undefined }}
-                    disabled={!isManager}
-                    onClick={handleNavigate}>
+                <button
+                    type="button"
+                    className={`bg-blue-500 border border-gray-300 text-gray-700 py-2 px-4 rounded float-right `}
+                    onClick={handleNavigate}
+                    disabled={!isManager}>
                     Add Show
-                </Button>
+                </button>
 
             </div>
             <br />
