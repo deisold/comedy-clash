@@ -1,0 +1,5 @@
+{
+    "watch": ["server/**/*.ts"],
+    "ext": "ts",
+    "exec": "ts-node -r ts-node/register server/server.ts"
+  }
