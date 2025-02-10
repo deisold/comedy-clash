@@ -1,23 +1,11 @@
-import express, { Request, Response } from 'express';
-import cors from "cors";
-import bodyParser from "body-parser";
 import { connectDB } from './config/database_config.js';
 import dotenv from 'dotenv';
-//
-dotenv.config();
-//
-const app = express();
+import app from './app.js';
+import { envPath } from './utils/env_paht.js';
 
-// Middleware
-app.use(cors()); // Enables CORS for all incoming requests
-app.use(bodyParser.json()); // Parses incoming requests with JSON payloads
-app.use(express.json());
-
+dotenv.config({ path: envPath });
+//
 const PORT = 5000;
-
-app.get('/', (req: Request, res: Response) => {
-  res.json({ message: 'Hello from Comedy Clash backend!' });
-});
 
 // Create a startup function to handle async operations
 async function startServer() {

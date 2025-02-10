@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import dotenv from 'dotenv';
-//
-dotenv.config();
+import { envPath } from '../utils/env_paht.js';
+
+dotenv.config({ path: envPath });
 
 const MONGO_URI = process.env.MONGO_URI;
 console.log('MONGO_URI:', process.env.MONGO_URI);
