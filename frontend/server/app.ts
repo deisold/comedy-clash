@@ -1,9 +1,11 @@
 import express, { Request, Response } from 'express';
 import cors from "cors";
 import bodyParser from "body-parser";
-import { connectDB } from './config/database_config.js';
-
+import { serverContext } from './di/ServerContext.js';
 //
+const { showRoutes, showService } = serverContext;
+//
+console.log(`showService: ${showService}, showService.getShow: ${showService.getShow}`);
 const app = express();
 
 // Middleware
@@ -14,5 +16,9 @@ app.use(express.json());
 app.get('/', (req: Request, res: Response) => {
   res.json({ message: 'Hello from Comedy Clash backend!' });
 });
+
+// Routes
+const routePrefix = '/api';
+app.use(`${routePrefix}/`, showRoutes.bind());
 
 export default app;
