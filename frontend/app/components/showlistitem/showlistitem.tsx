@@ -16,7 +16,7 @@ interface ShowDetailsState {
 }
 
 export default function ShowListItem({ index }: { index: number }) {
-    const { comedyTheaterRepo, comedyClashRepo } = useAppContext();
+    const { showService, comedyTheaterRepo, comedyClashRepo } = useAppContext();
     const router = useRouter();
 
     const [loading, setLoading] = useState(true);
@@ -37,21 +37,19 @@ export default function ShowListItem({ index }: { index: number }) {
                 setLoading(true);
                 setErrorMessage('');
 
-                const showAddress = await comedyTheaterRepo!!.getShowAdress(index);
+                const show = await showService!!.getShow(index);
+                if (show === null) {
+                    throw new Error('Show not found');
+                }
 
-                if (controller.signal.aborted || !comedyClashRepo) return;
-
-                const description = await comedyClashRepo.getDescription(showAddress);
-                const isClosed = await comedyClashRepo.isClosed(showAddress);
-                const submissionCount = await comedyClashRepo.getSubmissionCount(showAddress);
 
                 if (controller.signal.aborted) return;
 
                 setShowDetails({
-                    address: showAddress,
-                    description: description,
-                    isClosed: isClosed,
-                    submissionCount: submissionCount,
+                    address: show.address,
+                    description: show.description,
+                    isClosed: show.isClosed,
+                    submissionCount: show.submissionCount,
                 });
             } catch (error: any) {
                 if (controller.signal.aborted) return;
