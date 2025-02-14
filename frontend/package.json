@@ -9,6 +9,7 @@
     "@walletconnect/core": "^2.17.3",
     "@walletconnect/ethereum-provider": "^2.17.3",
     "@web3-react/core": "^8.2.3",
+    "axios": "^1.7.9",
     "dotenv": "^16.4.5",
     "ethers": "^6.13.5",
     "lodash": "^4.17.21",
