@@ -10,8 +10,13 @@ import { MockComedyClashAdapter } from '../../source/adapters/MockComedyClashAda
 import { ComedyClashRepo, ComedyClashRepoType } from '../../source/repositories/ComedyClashRepo';
 import { LoadingSpinner } from '../ui/LoadingSpinner';
 import RetryButton from '../ui/RetryButton';
-
+import axios from 'axios';
+import { ShowApiAdapter } from '../../source/adapters/api/ShowApiAdapter';
+import { ShowRepository, ShowRepositoryType } from '../../source/repositories/ShowRepo';
+import { ShowService, ShowServiceType } from '../../source/service/ShowService';
+//
 interface AppContextType {
+    showService: ShowServiceType | null;
     comedyTheaterRepo: ComedyTheaterRepoType | null;
     comedyClashRepo: ComedyClashRepoType | null;
     isManager: boolean;
@@ -27,12 +32,14 @@ export function AppProvider({ children }: AppProviderProps) {
     const [state, setState] = useState<{
         isLoading: boolean;
         error: unknown;
+        showService: ShowServiceType | null;
         comedyTheaterRepo: ComedyTheaterRepoType | null;
         comedyClashRepo: ComedyClashRepoType | null;
         isManager: boolean;
     }>({
         isLoading: true,
         error: null,
+        showService: null,
         comedyTheaterRepo: null,
         comedyClashRepo: null,
         isManager: false
@@ -67,6 +74,16 @@ export function AppProvider({ children }: AppProviderProps) {
                     throw new Error('Comedy Theater contract address not configured');
                 }
 
+                const httpClient = axios.create({
+                    baseURL: process.env.NEXT_PUBLIC_API_URL,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const showApiAdapter = ShowApiAdapter(httpClient);
+                const showRepo = ShowRepository(showApiAdapter);
+
                 const theaterRepo = ComedyTheaterRepo(
                     useMockData
                         ? MockComedyTheaterAdapter()
@@ -79,12 +96,19 @@ export function AppProvider({ children }: AppProviderProps) {
                     useMockData ? MockComedyClashAdapter : ComedyClashAdapter
                 );
 
+                const showService = ShowService(
+                    theaterRepo,
+                    clashRepo,
+                    showRepo
+                );
+
                 const isManager = await theaterRepo.isManager();
                 console.log("isManager", isManager);
 
                 setState({
                     isLoading: false,
                     error: null,
+                    showService: showService,
                     comedyTheaterRepo: theaterRepo,
                     comedyClashRepo: clashRepo,
                     isManager
@@ -117,13 +141,14 @@ export function AppProvider({ children }: AppProviderProps) {
                 <div className="text-red-500 mb-4" >
                     {state.error.toString()}
                 </div>
-                <RetryButton onClick={() => window.location.reload()}/>
+                <RetryButton onClick={() => window.location.reload()} />
             </div>
         );
     }
 
     return (
         <AppContext.Provider value={{
+            showService: state.showService,
             comedyTheaterRepo: state.comedyTheaterRepo,
             comedyClashRepo: state.comedyClashRepo,
             isManager: state.isManager
