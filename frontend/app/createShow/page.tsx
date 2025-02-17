@@ -2,18 +2,31 @@
 
 "use client"
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useEventEmitter } from '../components/ui/useToastEventEmitter';
 import { useCreateShowViewModel } from './CreateShowViewModel';
 import InputField from '../components/ui/InputField';
 import { buttonClassNameListCTA } from '../components/ui/styles/buttonClassNames';
-
+import { useDropzone } from "react-dropzone";
+//
 export default function CreateShow() {
     const router = useRouter();
     const { state, actions, eventEmitter } = useCreateShowViewModel();
 
     useEventEmitter(eventEmitter);
+
+    const onDrop = useCallback((acceptedFiles: File[]) => {
+        if (acceptedFiles.length > 0) {
+            actions.onChangeImage(acceptedFiles[0]);
+        }
+    }, []);
+
+    const { getRootProps, getInputProps } = useDropzone({
+        onDrop,
+        accept: { 'image/*': [] }, // Accept only images
+        maxFiles: 1, // Only allow one file
+    });
 
     const handleBack = () => {
         router.back();
@@ -45,6 +58,30 @@ export default function CreateShow() {
                     onChangeEvent={actions.onChangeDays}
                     label="Submission window"
                 />
+                <div>
+                    <div>
+                        <label>Name: {state?.image?.name}</label>
+                    </div>
+                    <div
+                        {...getRootProps()}
+                        style={{
+                            border: "2px dashed #ccc",
+                            padding: "20px",
+                            cursor: "pointer",
+                            textAlign: "center",
+                            marginBottom: "10px",
+                        }}>
+                        <input {...getInputProps()} />
+                        <p>Drag & drop an image here, or click to select one</p>
+                    </div>
+                    {state.image && (
+                        <div>
+                            <img src={URL.createObjectURL(state.image)} alt="Preview"
+                                style={{ width: "100%", maxHeight: "200px", objectFit: "contain", marginTop: "10px" }}
+                            />
+                        </div>
+                    )}
+                </div>
                 {/* TODO: Add LOADING INDICATOR */}
                 <button
                     type="button"

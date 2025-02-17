@@ -9,6 +9,7 @@ import { hasNoErrors } from '@/app/source/utils/utils';
 export interface CreateShowState {
     description: string;
     days: string;
+    image: File | null;
     isManager: boolean;
     loading: boolean;
     successMessage: string;
@@ -25,6 +26,7 @@ export interface ErrorMessages {
 export interface CreateShowViewModelActions {
     onChangeDescription: (e: InputChangeEvent) => void;
     onChangeDays: (e: InputChangeEvent) => void;
+    onChangeImage: (file: File) => void;
     onSubmit: () => void;
 }
 
@@ -44,6 +46,7 @@ export const useCreateShowViewModel = () => {
     const [state, setState] = useState<CreateShowState>({
         description: '',
         days: '',
+        image: null,
         isManager: appIsManager,
         loading: false,
         successMessage: '',
@@ -103,6 +106,9 @@ export const useCreateShowViewModel = () => {
                 errors: { ...prevState.errors, days: '' },
                 submitted: false
             }));
+        },
+        onChangeImage: (file: File) => {
+            setState(prevState => ({ ...prevState, image: file }));
         },
         onSubmit: async () => {
             // eventEmitter.emit('success', { type: 'success', message: 'TEST' });
