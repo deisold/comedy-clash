@@ -86,7 +86,7 @@ describe("ComedyClash", function () {
 
             const newSubmission = await comedyClash.submissions(0);
 
-            expect(newSubmission.id).to.equal(1);
+            expect(newSubmission.id).to.equal(0);
             expect(newSubmission.artist).to.equal(otherAccount);
             expect(newSubmission.name).to.equal(name);
             expect(newSubmission.preview).to.equal(preview);

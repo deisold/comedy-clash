@@ -49,6 +49,7 @@ describe("ComedyTheater", function () {
             expect(await comedyClash.description()).to.equal(description);
             expect(await comedyClash.manager()).to.equal(owner);
 
+            
         });
     });
 });

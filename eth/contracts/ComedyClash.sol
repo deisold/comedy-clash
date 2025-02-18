@@ -4,6 +4,10 @@ pragma solidity ^0.8.27;
 // Uncomment this line to use console.log
 // import "hardhat/console.sol";
 
+/* 
+    V.1.0.2:    - Changed the id of the submission to be the index of the array
+                - Added events SubmissionCreated and VotingCreated
+*/
 contract ComedyClash {
     address public manager;
     bool public closed = false;
@@ -47,6 +51,8 @@ contract ComedyClash {
         _;
     }
 
+    event SubmissionCreated(uint indexed id);
+    event VotingCreated(uint indexed submissionId, uint indexed votingIndex);
     // The owner/creater will be the factory, the manager the actual person running the theater
     constructor(
         address _manager,
@@ -71,13 +77,16 @@ contract ComedyClash {
         submissions.push();
         submissionCount++;
 
-        Submission storage newSubmission = submissions[submissionCount - 1];
+        uint index = submissionCount - 1;
+        Submission storage newSubmission = submissions[index];
 
-        newSubmission.id = submissionCount;
+        newSubmission.id = index;
         newSubmission.artist = msg.sender;
         newSubmission.name = _name;
         newSubmission.topic = _topic;
         newSubmission.preview = _preview;
+
+        emit SubmissionCreated(index);
     }
 
     // Creates a Voting for the submission at given index
@@ -101,6 +110,8 @@ contract ComedyClash {
 
         submission.votes.push(voting);
         submissionVoters[index][msg.sender] = true;
+        //
+        emit VotingCreated(index, submission.votes.length - 1);
 
         // compute the average vote for the submission
         submission.averageTotal += _value;
