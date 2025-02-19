@@ -2,8 +2,16 @@ import { connectDB } from './config/database_config.js';
 import dotenv from 'dotenv';
 import app from './app.js';
 import { envPath } from './utils/env_paht.js';
-
+import { v2 as cloudinary } from 'cloudinary';
+//
 dotenv.config({ path: envPath });
+
+// Cloudinary configuration
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 //
 const PORT = 5000;
 

@@ -1,13 +1,15 @@
 {
     "compilerOptions": {
-        "target": "ES6",
-        "module": "ESNext",
+        "target": "ES2017",  // ✅ Supports async/await natively
+        "module": "ESNext",  // ✅ Works with modern bundlers
+        "lib": ["ES2017"],  // ✅ Ensure ES2017 features are included
+        "moduleResolution": "Node",
         "outDir": "./dist",
         "rootDir": "./",
         "strict": true,
+        "noImplicitAny": true,
         "esModuleInterop": true,
         "resolveJsonModule": true,
-        "moduleResolution": "node"
     },
     "include": [
         "./**/*.ts"
@@ -17,3 +19,23 @@
     ],
 
 }
+// {
+//     "compilerOptions": {
+//         "target": "ES6",
+//         "module": "ESNext",
+//         "outDir": "./dist",
+//         "rootDir": "./",
+//         "strict": true,
+//         "noImplicitAny": true,
+//         "esModuleInterop": true,
+//         "resolveJsonModule": true,
+//         "moduleResolution": "node"
+//     },
+//     "include": [
+//         "./**/*.ts"
+// , "server.mjs"    ],
+//     "exclude": [
+//         "node_modules"
+//     ],
+
+// }
