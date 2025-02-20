@@ -1,9 +1,11 @@
 {
     "compilerOptions": {
-        "target": "ES2017",  // ✅ Supports async/await natively
-        "module": "ESNext",  // ✅ Works with modern bundlers
-        "lib": ["ES2017"],  // ✅ Ensure ES2017 features are included
-        "moduleResolution": "Node",
+        "target": "ES2017", // ✅ Supports async/await natively
+        "module": "ESNext", // ✅ Works with modern bundlers
+        "lib": [
+            "ES2017"
+        ], // ✅ Ensure ES2017 features are included
+        "moduleResolution": "node",
         "outDir": "./dist",
         "rootDir": "./",
         "strict": true,
@@ -11,13 +13,18 @@
         "esModuleInterop": true,
         "resolveJsonModule": true,
     },
+    "ts-node": {
+        "experimentalSpecifierResolution": "node", // Resolves imports the same way as Node.js
+        "transpileOnly": true, // Transpiles TypeScript but skips type-checking (faster)
+        "esm": true // Explicitly enables ESM support in ts-node
+    },
     "include": [
-        "./**/*.ts"
-, "server.mjs"    ],
+        "./**/*.ts",
+        "server.mjs"
+    ],
     "exclude": [
         "node_modules"
     ],
-
 }
 // {
 //     "compilerOptions": {
@@ -37,5 +44,4 @@
 //     "exclude": [
 //         "node_modules"
 //     ],
-
 // }

@@ -1,15 +1,54 @@
 import { Show } from "../reposity/data/Show.js";
-import { ShowRepositoryType } from "../reposity/ShowRepositoryType.js";
 import { v2 as cloudinary } from 'cloudinary';
-import { ShowServiceType } from "./ShowServiceType.js";
+import { BlockchainTxRepositoryType } from "../reposity/BlockchainTxRepository.js";
+import { AuthStoreType } from "../store/AuthStore.js";
+import { TxStatus } from "../database/model/TxStatus.js";
+import { ShowCreation, fromShowRequest } from "../controller/data/ShowRequestBody.js";
+import { ShowRepositoryType } from "../reposity/ShowRepository.js";
 //
-export const ShowService = (showRepository: ShowRepositoryType): ShowServiceType => {
+export interface ShowServiceType {
+    getShow: (id: string) => Promise<Show | null>;
+    createShow: (showRequest: ShowCreation, imageBlob: string | null) => Promise<Show>;
+    uploadImage: (id: string, imageName: string, fileBase64: string) => Promise<Show>;
+    updateShow: (id: string, description: string, imageUrl: string | null) => Promise<Show>;
+    deleteShow: (id: string) => Promise<void>;
+}
+//
+export const ShowService = (showRepository: ShowRepositoryType,
+    blockchainTxRepository: BlockchainTxRepositoryType,
+    authStore: AuthStoreType,
+    getImageBuffer: (imageBlobBase64: string) => Buffer
+): ShowServiceType => {
+
     const getShow = async (id: string) => {
         return showRepository.getShow(id);
     }
 
-    const createShow = async (show: Show) => {
-        return showRepository.createShow(show);
+    const createShow = async (showRequest: ShowCreation, imageBlob: string | null) => {
+        const authUser = authStore.getUser();
+        if (!authUser) {
+            throw new Error("Auth user not found");
+        }
+        // Create the pending blockchain transaction entry
+        const blockchainTxPromise = blockchainTxRepository.createBlockchainTx({
+            txHash: showRequest.txHash,
+            status: TxStatus.PENDING,
+            imageBlob: imageBlob ? getImageBuffer(imageBlob) : null,
+            walletAddress: authUser.walletAddress,
+            userId: authUser.userId,
+            timestamp: new Date()
+        });
+
+        // Create the show entry
+        const show: Show = fromShowRequest({
+            showCreation: showRequest, 
+            id: showRequest.txHash, // temporary id
+            txStatus: TxStatus.PENDING, 
+            userId: authUser.userId
+        });
+        const showPromise = showRepository.createShow(show);
+        const [blockchainTx, createdShow] = await Promise.all([blockchainTxPromise, showPromise]);
+        return createdShow;
     }
 
     const uploadImage = async (id: string, imageName: string, fileBase64: string) => {

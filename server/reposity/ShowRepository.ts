@@ -1,17 +1,15 @@
 import ShowDB from "../database/model/ShowDB.js";
 import { fromDBShow, Show, toDBShow } from "./data/Show.js";
-import { ShowRepositoryType } from "./ShowRepositoryType.js";
+//
+export type ShowRepositoryType = {
+    createShow: (show: Show) => Promise<Show>;
+    getShow: (id: string | null) => Promise<Show | null>;
+    updateShow: (id: string, show: Show) => Promise<Show>;
+    deleteShow: (id: string) => Promise<void>;
+};
 //
 export const ShowRepository = (showDB = ShowDB): ShowRepositoryType => {
-
-    const getShow = async (id: string | undefined) => {
-        if (!id) {
-            return null;
-        }
-        const show = await showDB.findOne({ address: id });
-        return fromDBShow(show);
-    }
-
+   
     const createShow = async (show: Show) => {
         console.log(`ShowRepository::createShow ${show.id}`);
         const show_db = toDBShow(show);
@@ -20,6 +18,14 @@ export const ShowRepository = (showDB = ShowDB): ShowRepositoryType => {
         }
         const newShow = await showDB.create(show_db);
         return fromDBShow(newShow)!!;
+    }
+
+    const getShow = async (id: string | null) => {
+        if (!id) {
+            return null;
+        }
+        const show = await showDB.findOne({ address: id });
+        return fromDBShow(show);
     }
 
     const updateShow = async (id: string, show: Show) => {

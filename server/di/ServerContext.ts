@@ -1,25 +1,32 @@
-import { ShowRepository } from "../reposity/ShowReposity.js";
-import { ShowRepositoryType } from "../reposity/ShowRepositoryType.js";
+import express from 'express';
+import { ShowRepository } from "../reposity/ShowRepository.js";
+import { ShowRepositoryType } from "../reposity/ShowRepository.js";
 import ShowDB from "../database/model/ShowDB.js";
-import { ShowService } from "../service/ShowService.js";
-import { ShowServiceType } from "../service/ShowServiceType.js";
+import { ShowService, ShowServiceType } from "../service/ShowService.js";
 import { ShowController } from "../controller/showController.js";
 import { ShowRoutes, ShowRoutesType } from "../routes/showRoutes.js";
-import express from 'express';
-
+import { BlockchainTxRepository } from "../reposity/BlockchainTxRepository.js";
+import { BlockchainTxRepositoryType } from "../reposity/BlockchainTxRepository.js";
+import BlockchainTxDB from "../database/model/BlockchainTxDB.js";
+import { AuthStore, AuthStoreType } from "../store/AuthStore.js";
+import { getImageBuffer } from "../utils/imageUtils.js";
 // Remove React imports and context creation
 export interface ServerContextType {
     showRepository: ShowRepositoryType;
     showService: ShowServiceType;
     showController: ShowController;
     showRoutes: ShowRoutesType;
+    authStore: AuthStoreType;
 }
 
 const router = express.Router();
 
 // Create instances
+const authStore: AuthStoreType = AuthStore();
+//
 const showRepository: ShowRepositoryType = ShowRepository(ShowDB);
-const showService: ShowServiceType = ShowService(showRepository);
+const blockchainTxRepository: BlockchainTxRepositoryType = BlockchainTxRepository(BlockchainTxDB);
+const showService: ShowServiceType = ShowService(showRepository, blockchainTxRepository, authStore, getImageBuffer);
 const showController: ShowController = new ShowController(showService);
 const showRoutes: ShowRoutesType = ShowRoutes(showController, router);
 
@@ -30,9 +37,10 @@ export function getShowController() { return showController; }
 export function getShowRoutes() { return showRoutes; }
 
 // Export the context object if needed
-export const serverContext: ServerContextType = {
+export const useServerContext: ServerContextType = {
     showRepository,
     showService,
     showController,
     showRoutes,
+    authStore,
 };

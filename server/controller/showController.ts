@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import { ShowServiceType } from "../service/ShowServiceType.js";
-import { ShowRequestBody } from "./data/ShowRequestBody.js";
+import { ShowCreation, validateShowCreation } from "./data/ShowRequestBody.js";
 import { StatusCodes } from 'http-status-codes';
 import { ShowUpdateRequestBody } from './data/ShowUpdateRequestBody.js';
+import { ShowServiceType } from '../service/ShowService.js';
+import { getImageBase64 } from '../utils/imageUtils.js';
 //
 export class ShowController {
     constructor(private showService: ShowServiceType) { }
@@ -30,14 +31,21 @@ export class ShowController {
         }
     }
 
-    createShow = async (req: Request & { body: ShowRequestBody }, res: Response) => {
-        const showRequestData = req.body as ShowRequestBody;
+    createShow = async (req: Request & { body: ShowCreation }, res: Response) => {
+        const showRequestData = req.body as ShowCreation;
+        console.log(`ShowController::createShow txHash=${showRequestData.txHash}`);
+
+        if (!validateShowCreation(showRequestData)) {
+            res.status(StatusCodes.BAD_REQUEST).json({ error: "Invalid show creation data" });
+            return;
+        }
         try {
-            console.log(`ShowController::createShow ${showRequestData.id}`);
-            const show = await this.showService.createShow(showRequestData);
+            const image = req.file;
+            const imageBase64 = getImageBase64(image);
+            const show = await this.showService.createShow(showRequestData, imageBase64);
             res.status(StatusCodes.CREATED).json(show);
         } catch (error) {
-            console.error(`ShowController::createShow ${showRequestData.id} error: ${error}`);
+            console.error(`ShowController::createShow txHash=${showRequestData.txHash} error: ${error}`);
             res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "Failed to create show" });
         }
     }
