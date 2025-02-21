@@ -7,15 +7,13 @@ import { ethers, Network, WebSocketProvider, Provider } from "ethers";
  * @returns {Promise<Provider>} The initialized provider
  */
 export async function initWeb3Provider(): Promise<Provider> {
-    let provider: Provider | null = null;
-
     const infuraEndpointWs = process.env.INFURA_ENDPOINT_WS as string;
     console.log(`initWeb3Provider: INFURA_ENDPOINT_WS=${infuraEndpointWs}`);
     try {
         // Setup read-only JsonRpcProvider
         console.log("initWeb3Provider: using WebSocketProvider(infura)");
         const localProvider = new WebSocketProvider(infuraEndpointWs);
-        console.log(`initWeb3Provider: Provider initialized successfully: provider=${provider}`);
+        console.log(`initWeb3Provider: Provider initialized successfully: provider=${localProvider}`);
         return localProvider;
     } catch (error) {
         console.error('initWeb3Provider: Failed to initialize provider', error);
