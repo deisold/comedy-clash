@@ -10,6 +10,8 @@ import { BlockchainTxRepositoryType } from "../reposity/BlockchainTxRepository.j
 import BlockchainTxDB from "../database/model/BlockchainTxDB.js";
 import { AuthStore, AuthStoreType } from "../store/AuthStore.js";
 import { getImageBuffer } from "../utils/imageUtils.js";
+import { ComedyTheaterEventObserver, ComedyTheaterEventObserverType } from "../web3/ComedyTheaterEventObserver.js";
+import { initWeb3Provider } from '../web3/utils/web3.js';
 // Remove React imports and context creation
 export interface ServerContextType {
     showRepository: ShowRepositoryType;
@@ -17,12 +19,17 @@ export interface ServerContextType {
     showController: ShowController;
     showRoutes: ShowRoutesType;
     authStore: AuthStoreType;
+    comedyTheaterEventObserver: ComedyTheaterEventObserverType;
 }
 
 const router = express.Router();
 
 // Create instances
 const authStore: AuthStoreType = AuthStore();
+//
+const comedyTheaterContractAddress = process.env.COMEDY_THEATER_ADDRESS as string;
+const comedyTheaterEventObserver: ComedyTheaterEventObserverType = ComedyTheaterEventObserver(
+    comedyTheaterContractAddress, initWeb3Provider);
 //
 const showRepository: ShowRepositoryType = ShowRepository(ShowDB);
 const blockchainTxRepository: BlockchainTxRepositoryType = BlockchainTxRepository(BlockchainTxDB);
@@ -43,4 +50,5 @@ export const useServerContext: ServerContextType = {
     showController,
     showRoutes,
     authStore,
+    comedyTheaterEventObserver
 };

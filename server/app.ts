@@ -31,5 +31,4 @@ const fakeUser: AuthUser = {
 };
 authStore.login(fakeUser);
 
-
 export default app;

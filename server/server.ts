@@ -3,6 +3,8 @@ import dotenv from 'dotenv';
 import app from './app.js';
 import { envPath } from './utils/env_paht.js';
 import { v2 as cloudinary } from 'cloudinary';
+import { useServerContext } from './di/ServerContext.js';
+const { comedyTheaterEventObserver } = useServerContext;
 //
 dotenv.config({ path: envPath });
 
@@ -21,6 +23,8 @@ async function startServer() {
     // Connect to database first
     await connectDB();
 
+    await comedyTheaterEventObserver.startObserving();
+
     // Start server after successful DB connection
     const server = app.listen(PORT, () => {
       console.log(`✅ Server running on http://localhost:${PORT}`);
@@ -29,6 +33,8 @@ async function startServer() {
     // Handle Unhandled Promise Rejections
     process.on("unhandledRejection", (err: Error) => {
       console.error(`Unhandled Rejection: ${err.message}`);
+
+      comedyTheaterEventObserver.stopObserving();
 
       // Gracefully close the server
       server.close(async () => {
