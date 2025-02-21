@@ -3,12 +3,12 @@ import { v2 as cloudinary } from 'cloudinary';
 import { BlockchainTxRepositoryType } from "../reposity/BlockchainTxRepository.js";
 import { AuthStoreType } from "../store/AuthStore.js";
 import { TxStatus } from "../database/model/TxStatus.js";
-import { ShowCreation, fromShowRequest } from "../controller/data/ShowRequestBody.js";
+import { ShowCreationPayload, fromShowRequest } from "../controller/data/ShowCreationPayload.js";
 import { ShowRepositoryType } from "../reposity/ShowRepository.js";
 //
 export interface ShowServiceType {
     getShow: (id: string) => Promise<Show | null>;
-    createShow: (showRequest: ShowCreation, imageBlob: string | null) => Promise<Show>;
+    createShow: (description: string, txHash: string, imageBlob: string | null) => Promise<Show>;
     uploadImage: (id: string, imageName: string, fileBase64: string) => Promise<Show>;
     updateShow: (id: string, description: string, imageUrl: string | null) => Promise<Show>;
     deleteShow: (id: string) => Promise<void>;
@@ -24,14 +24,14 @@ export const ShowService = (showRepository: ShowRepositoryType,
         return showRepository.getShow(id);
     }
 
-    const createShow = async (showRequest: ShowCreation, imageBlob: string | null) => {
+    const createShow = async (description: string, txHash: string, imageBlob: string | null) => {
         const authUser = authStore.getUser();
         if (!authUser) {
             throw new Error("Auth user not found");
         }
         // Create the pending blockchain transaction entry
         const blockchainTxPromise = blockchainTxRepository.createBlockchainTx({
-            txHash: showRequest.txHash,
+            txHash: txHash,
             status: TxStatus.PENDING,
             imageBlob: imageBlob ? getImageBuffer(imageBlob) : null,
             walletAddress: authUser.walletAddress,
@@ -41,9 +41,10 @@ export const ShowService = (showRepository: ShowRepositoryType,
 
         // Create the show entry
         const show: Show = fromShowRequest({
-            showCreation: showRequest, 
-            id: showRequest.txHash, // temporary id
-            txStatus: TxStatus.PENDING, 
+            description: description,
+            txHash: txHash,
+            id: txHash, // temporary id
+            txStatus: TxStatus.PENDING,
             userId: authUser.userId
         });
         const showPromise = showRepository.createShow(show);

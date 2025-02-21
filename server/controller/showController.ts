@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { ShowCreation, validateShowCreation } from "./data/ShowRequestBody.js";
+import { ShowCreationPayload, validateShowCreation } from "./data/ShowCreationPayload.js";
 import { StatusCodes } from 'http-status-codes';
 import { ShowUpdateRequestBody } from './data/ShowUpdateRequestBody.js';
 import { ShowServiceType } from '../service/ShowService.js';
@@ -31,18 +31,18 @@ export class ShowController {
         }
     }
 
-    createShow = async (req: Request & { body: ShowCreation }, res: Response) => {
-        const showRequestData = req.body as ShowCreation;
+    createShow = async (req: Request & { body: ShowCreationPayload }, res: Response) => {
+        const showRequestData = req.body as ShowCreationPayload;
         console.log(`ShowController::createShow txHash=${showRequestData.txHash}`);
 
         if (!validateShowCreation(showRequestData)) {
-            res.status(StatusCodes.BAD_REQUEST).json({ error: "Invalid show creation data" });
+            res.status(StatusCodes.BAD_REQUEST).json({ error: "Invalid show creation payload" });
             return;
         }
         try {
             const image = req.file;
             const imageBase64 = getImageBase64(image);
-            const show = await this.showService.createShow(showRequestData, imageBase64);
+            const show = await this.showService.createShow(showRequestData.description, showRequestData.txHash, imageBase64);
             res.status(StatusCodes.CREATED).json(show);
         } catch (error) {
             console.error(`ShowController::createShow txHash=${showRequestData.txHash} error: ${error}`);
