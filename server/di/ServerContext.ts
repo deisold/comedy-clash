@@ -9,7 +9,6 @@ import { BlockchainTxRepository } from "../reposity/BlockchainTxRepository.js";
 import { BlockchainTxRepositoryType } from "../reposity/BlockchainTxRepository.js";
 import BlockchainTxDB from "../database/model/BlockchainTxDB.js";
 import { AuthStore, AuthStoreType } from "../store/AuthStore.js";
-import { getImageBuffer } from "../utils/imageUtils.js";
 import { ComedyTheaterEventObserver, ComedyTheaterEventObserverType } from "../web3/ComedyTheaterEventObserver.js";
 import { initWeb3Provider } from '../web3/utils/web3.js';
 // Remove React imports and context creation
@@ -33,7 +32,7 @@ const comedyTheaterEventObserver: ComedyTheaterEventObserverType = ComedyTheater
 //
 const showRepository: ShowRepositoryType = ShowRepository(ShowDB);
 const blockchainTxRepository: BlockchainTxRepositoryType = BlockchainTxRepository(BlockchainTxDB);
-const showService: ShowServiceType = ShowService(showRepository, blockchainTxRepository, authStore, getImageBuffer);
+const showService: ShowServiceType = ShowService(showRepository, blockchainTxRepository, authStore);
 const showController: ShowController = new ShowController(showService);
 const showRoutes: ShowRoutesType = ShowRoutes(showController, router);
 

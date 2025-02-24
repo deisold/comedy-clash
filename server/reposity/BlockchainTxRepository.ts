@@ -16,7 +16,7 @@ export const BlockchainTxRepository = (db = BlockchainTxDB): BlockchainTxReposit
             throw new Error("BlockchainTx is null");
         }
         const newBlockchainTx = await db.create(blockchainTxDB);
-        return fromDBBlockchainTx(newBlockchainTx)!!;
+       return fromDBBlockchainTx(newBlockchainTx)!!;
     }
 
     const getBlockchainTx = async (txHash: string) => {

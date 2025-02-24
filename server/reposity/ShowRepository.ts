@@ -11,12 +11,13 @@ export type ShowRepositoryType = {
 export const ShowRepository = (showDB = ShowDB): ShowRepositoryType => {
    
     const createShow = async (show: Show) => {
-        console.log(`ShowRepository::createShow ${show.id}`);
+        console.log(`ShowRepository::createShow txHash=${show.txHash}`);
         const show_db = toDBShow(show);
         if (!show_db) {
             throw new Error("Show is null");
         }
         const newShow = await showDB.create(show_db);
+        console.log(`ShowRepository::createShow Show created=${JSON.stringify(newShow)}`);
         return fromDBShow(newShow)!!;
     }
 

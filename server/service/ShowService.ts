@@ -8,8 +8,8 @@ import { ShowRepositoryType } from "../reposity/ShowRepository.js";
 //
 export interface ShowServiceType {
     getShow: (id: string) => Promise<Show | null>;
-    createShow: (description: string, txHash: string, imageBlob: string | null) => Promise<Show>;
-    uploadImage: (id: string, imageName: string, fileBase64: string) => Promise<Show>;
+    createShow: (description: string, txHash: string, image: Buffer | undefined) => Promise<Show>;
+    uploadImage: (id: string, imageName: string, imageBase64: string) => Promise<Show>;
     updateShow: (id: string, description: string, imageUrl: string | null) => Promise<Show>;
     deleteShow: (id: string) => Promise<void>;
 }
@@ -17,23 +17,23 @@ export interface ShowServiceType {
 export const ShowService = (showRepository: ShowRepositoryType,
     blockchainTxRepository: BlockchainTxRepositoryType,
     authStore: AuthStoreType,
-    getImageBuffer: (imageBlobBase64: string) => Buffer
 ): ShowServiceType => {
 
     const getShow = async (id: string) => {
         return showRepository.getShow(id);
     }
 
-    const createShow = async (description: string, txHash: string, imageBlob: string | null) => {
+    const createShow = async (description: string, txHash: string, imageBuffer: Buffer | undefined) => {
         const authUser = authStore.getUser();
         if (!authUser) {
             throw new Error("Auth user not found");
         }
+        console.log(`ShowService::createShow txHash=${txHash}, image=${imageBuffer?.length} bytesÇ`);
         // Create the pending blockchain transaction entry
         const blockchainTxPromise = blockchainTxRepository.createBlockchainTx({
             txHash: txHash,
             status: TxStatus.PENDING,
-            imageBlob: imageBlob ? getImageBuffer(imageBlob) : null,
+            image: imageBuffer,
             walletAddress: authUser.walletAddress,
             userId: authUser.userId,
             timestamp: new Date()
@@ -49,6 +49,10 @@ export const ShowService = (showRepository: ShowRepositoryType,
         });
         const showPromise = showRepository.createShow(show);
         const [blockchainTx, createdShow] = await Promise.all([blockchainTxPromise, showPromise]);
+        const { image, ...logData } = blockchainTx;
+        console.log(`ShowService::createShow createdShow=${JSON.stringify(createdShow)}`);
+        console.log(`ShowService::createShow blockchainTx=${JSON.stringify(logData)}, image=${imageBuffer?.length} bytes`);
+ 
         return createdShow;
     }
 

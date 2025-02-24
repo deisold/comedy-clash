@@ -4,7 +4,7 @@ import { BlockchainTxDBType } from "../../database/model/BlockchainTxDB.js";
 export interface BlockchainTx {
     txHash: string;
     status: typeof TxStatus[keyof typeof TxStatus];
-    imageBlob: Buffer | null;
+    image: Buffer | undefined;
     walletAddress: string;
     userId: string;
     timestamp: Date;
@@ -14,7 +14,7 @@ export function fromDBBlockchainTx(dbBlockchainTx: BlockchainTxDBType | null): B
     return (dbBlockchainTx === null || dbBlockchainTx === undefined) ? null : {
         txHash: dbBlockchainTx.txHash,
         status: dbBlockchainTx.status,
-        imageBlob: dbBlockchainTx.imageBlob ?? null,
+        image: dbBlockchainTx.image ?? undefined,
         walletAddress: dbBlockchainTx.walletAddress,
         userId: dbBlockchainTx.userId,
         timestamp: dbBlockchainTx.timestamp
@@ -25,7 +25,7 @@ export function toDBBlockchainTx(blockchainTx: BlockchainTx | null): BlockchainT
     return (blockchainTx === null || blockchainTx === undefined) ? null : {
         txHash: blockchainTx.txHash,
         status: blockchainTx.status,
-        imageBlob: blockchainTx.imageBlob ?? null,
+        image: blockchainTx.image ?? undefined,
         walletAddress: blockchainTx.walletAddress,
         userId: blockchainTx.userId,
         timestamp: blockchainTx.timestamp

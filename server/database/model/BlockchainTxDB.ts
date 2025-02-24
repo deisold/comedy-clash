@@ -9,7 +9,7 @@ export interface BlockchainTxDBType {
     userId: string;
     timestamp: Date;
     status: typeof TxStatus[keyof typeof TxStatus];
-    imageBlob: Buffer | null;
+    image: Buffer | undefined;
 }
 
 const blockchainTxSchemaDB = new mongoose.Schema<BlockchainTxDBType>({
@@ -35,7 +35,7 @@ const blockchainTxSchemaDB = new mongoose.Schema<BlockchainTxDBType>({
         required: true,
         enum: TxStatus
     },
-    imageBlob: {
+    image: {
         type: Buffer,
         required: false
     }

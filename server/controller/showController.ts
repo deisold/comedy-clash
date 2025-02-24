@@ -32,17 +32,18 @@ export class ShowController {
     }
 
     createShow = async (req: Request & { body: ShowCreationPayload }, res: Response) => {
+        console.log("ShowController::createShow Received body:", req.body);  // txHash, description, etc.
+        //
         const showRequestData = req.body as ShowCreationPayload;
-        console.log(`ShowController::createShow txHash=${showRequestData.txHash}`);
+        console.log(`ShowController::createShow txHash=${showRequestData.txHash}, file name=${req.file?.originalname}`);
 
         if (!validateShowCreation(showRequestData)) {
             res.status(StatusCodes.BAD_REQUEST).json({ error: "Invalid show creation payload" });
             return;
         }
         try {
-            const image = req.file;
-            const imageBase64 = getImageBase64(image);
-            const show = await this.showService.createShow(showRequestData.description, showRequestData.txHash, imageBase64);
+            const image = req.file?.buffer;
+            const show = await this.showService.createShow(showRequestData.description, showRequestData.txHash, image);
             res.status(StatusCodes.CREATED).json(show);
         } catch (error) {
             console.error(`ShowController::createShow txHash=${showRequestData.txHash} error: ${error}`);
@@ -63,8 +64,8 @@ export class ShowController {
                 return;
             }
             // Convert file to Base64 for Cloudinary
-            const fileBase64 = `data:${image.mimetype};base64,${image.buffer.toString("base64")}`;
-            const show = await this.showService.uploadImage(id, image.originalname, fileBase64);
+            const imageBase64 = getImageBase64(image)!!;
+            const show = await this.showService.uploadImage(id, image.originalname, imageBase64);
 
             console.log(`ShowController::uploadImage ${id} show: ${show}`);
             res.status(StatusCodes.CREATED).json(show);

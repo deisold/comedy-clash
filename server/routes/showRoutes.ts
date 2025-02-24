@@ -13,7 +13,7 @@ export const ShowRoutes = (showController: ShowController, router: express.Route
     const bind = () => {
         console.log(`ShowRoutes::getRoutes setting up routes`);
         //
-        router.post('/shows', upload.single("image"), showController.createShow);
+        router.post('/shows', upload.single('image'), showController.createShow);
         router.get('/shows/:id', showController.getShow);
         router.put('/shows/:id', showController.updateShow);
         router.post('/shows/:id/upload-image', upload.single('image'), showController.uploadImage);
