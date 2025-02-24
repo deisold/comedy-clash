@@ -2,12 +2,14 @@ import { ShowRepositoryType } from "../repositories/ShowRepo";
 import { ComedyTheaterRepoType } from "../repositories/ComedyTheaterRepo";
 import { ComedyClashRepoType } from "../repositories/ComedyClashRepo";
 import _ from "lodash";
-import { createShow, Show } from "../data/Show";
+import { toShow, Show } from "../data/Show";
+import { TxStatus } from "@/data/TxStatus";
 //
 export interface ShowServiceType {
     getShowAmount: () => Promise<number>;
     getShowAdress: (index: number) => Promise<string>;
     getShow: (index: number) => Promise<Show | null>;
+    addShow: (description: string, days: number, imageUrl: string | null) => Promise<void>;
 }
 
 export const ShowService = (
@@ -37,18 +39,29 @@ export const ShowService = (
                 const isClosed = await comedyClashRepo.isClosed(address);
                 const submissionCount = await comedyClashRepo.getSubmissionCount(address);
 
-                return createShow({
-                    id: index,
-                    address: address,
-                    submissionCount: submissionCount,
-                    isClosed: isClosed,
+                return toShow({
+                    id: address,
+                    userId: showRepo?.userId ?? "",
                     description: description ?? "",
                     imageUrl: showRepo?.imageUrl,
+                    txHash: showRepo?.txHash ?? "",
+                    txStatus: showRepo?.txStatus ?? TxStatus.PENDING,
+                    createdAt: showRepo?.createdAt ?? new Date(),
                 });
             } catch (error) {
                 console.error(error);
                 return null;
             }
+        },
+        addShow: async ( description: string, days: number, imageUrl: string | null) => {
+            return new Promise<void>((resolve, reject) => {
+                try {
+                    // const tx = await comedyTheaterRepo.addShow(description, days, imageUrl);
+                    // resolve(tx);
+                } catch (error) {
+                    reject(error);
+                }
+            });
         }
     }
 }

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { SubmissionInputErrorMessages, validateSubmissionInputUseCase } from "./useCases/ValidateRatingInput";
 import { useBlockchainState } from "@/app/components/providers/BlockchainStateProvider";
-import { TxUseCaseState, TxUseCaseStateEnum, useTxUseCase } from "@/app/source/useCase/useTxUseCase";
+import { TxUseCaseState, useTxUseCase } from "@/app/source/useCase/useTxUseCase";
 import { useAppContext } from "@/app/components/providers/providers";
 import { InputChangeEvent } from "@/app/source/common/CommonTypes";
 import { ViewModelEventEmitter } from "@/app/source/common/CommonEvents";
@@ -50,7 +50,6 @@ export const useCreateSubmissionViewModel = (showAddress: string) => {
     const {
         state: createSubmissionTxState,
         start: createSubmissionTxStart,
-        abortControllerRef: createSubmissionTxAbortControllerRef
     } = useTxUseCase(
         'CreateSubmissionViewModel::createSubmission',
         () => comedyClashRepo!!.createSubmissions(showAddress, state.name, state.topic, state.preview),
@@ -60,18 +59,18 @@ export const useCreateSubmissionViewModel = (showAddress: string) => {
     const handleTransactionStateChange = (state: TxUseCaseState) => {
         const { msg } = state;
         switch (state.state) {
-            case TxUseCaseStateEnum.Launched:
+            case TxUseCaseState.Launched:
                 setState(prevState => ({ ...prevState, loading: true }));
                 break;
-            case TxUseCaseStateEnum.TxCreated:
-            case TxUseCaseStateEnum.TxConfirmed:
+            case TxUseCaseState.TxCreated:
+            case TxUseCaseState.TxConfirmed:
                 setState(prevState => ({
                     ...prevState, successMessage: msg,
-                    loading: state.state === TxUseCaseStateEnum.TxConfirmed ? false : prevState.loading
+                    loading: state.state === TxUseCaseState.TxConfirmed ? false : prevState.loading
                 }));
                 eventEmitter.emit('success', { type: 'success', message: msg });
                 break;
-            case TxUseCaseStateEnum.Error:
+            case TxUseCaseState.Error:
                 setState(prevState => ({ ...prevState, errorMessage: msg, loading: false }));
                 eventEmitter.emit('error', { type: 'error', message: msg });
                 break;
@@ -121,7 +120,6 @@ export const useCreateSubmissionViewModel = (showAddress: string) => {
 
             if (hasNoErrors(errors)) {
                 createSubmissionTxStart();
-                return () => createSubmissionTxAbortControllerRef.current?.abort();
             }
         }
     };

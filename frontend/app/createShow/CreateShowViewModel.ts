@@ -1,19 +1,20 @@
-import { useAppContext } from '@/app/components/providers/providers';
 import { validateShowInputUseCase, ShowInputErrorMessages } from '@/app/createShow/useCases/ValidateShowInput';
 import { useState, useRef, useEffect } from 'react';
 import { ViewModelEventEmitter } from '@/app/source/common/CommonEvents';
 import { InputChangeEvent } from '../source/common/CommonTypes';
-import { useTxUseCase, TxUseCaseState, TxUseCaseStateEnum } from '../source/useCase/useTxUseCase';
+import { useTxUseCase, TxUseCaseState } from '../source/useCase/useTxUseCase';
 import { hasNoErrors } from '@/app/source/utils/utils';
-
+import { ComedyTheaterRepoType } from '../source/repositories/ComedyTheaterRepo';
+import { ShowRepositoryType } from '../source/repositories/ShowRepo';
+//
 export interface CreateShowState {
     description: string;
     days: string;
     image: File | null;
     isManager: boolean;
     loading: boolean;
-    successMessage: string;
-    errorMessage: string;
+    successMessage?: string;
+    errorMessage?: string;
     errors: ErrorMessages;
     submitted: boolean;
 }
@@ -30,14 +31,17 @@ export interface CreateShowViewModelActions {
     onSubmit: () => void;
 }
 
-export const useCreateShowViewModel = () => {
-    const { comedyTheaterRepo, isManager: appIsManager } = useAppContext();
-    const eventEmitter = useRef(new ViewModelEventEmitter()).current;
+export const useCreateShowViewModel = (
+    comedyTheaterRepo: ComedyTheaterRepoType,
+    showRepo: ShowRepositoryType,
+    isManager: boolean,
+    viewModelEventEmitter: ViewModelEventEmitter
+) => {
+    const eventEmitter = useRef(viewModelEventEmitter).current;
 
     const {
         state: addShowTxState,
         start: addShowTxStart,
-        abortControllerRef: addShowTxAbortControllerRef
     } = useTxUseCase(
         'CreateShowViewModel::addShow',
         () => comedyTheaterRepo!!.addShow(state.description, Number(state.days)),
@@ -47,7 +51,7 @@ export const useCreateShowViewModel = () => {
         description: '',
         days: '',
         image: null,
-        isManager: appIsManager,
+        isManager: isManager,
         loading: false,
         successMessage: '',
         errorMessage: '',
@@ -56,27 +60,30 @@ export const useCreateShowViewModel = () => {
     });
 
     useEffect(() => {
-        if (!appIsManager) {
+        if (!isManager) {
             setState(prevState => ({ ...prevState, errorMessage: 'You are not authorized to create a show' }));
         }
-    }, [appIsManager]);
+    }, [isManager]);
 
     // Function to handle transaction state changes
-    const handleTransactionStateChange = (state: TxUseCaseState) => {
-        const { msg } = state;
-        switch (state.state) {
-            case TxUseCaseStateEnum.Launched:
+    const handleTransactionStateChange = (useCaseState: TxUseCaseState) => {
+        const { msg } = useCaseState;
+        switch (useCaseState.state) {
+            case TxUseCaseState.Launched:
                 setState(prevState => ({ ...prevState, loading: true }));
                 break;
-            case TxUseCaseStateEnum.TxCreated:
-            case TxUseCaseStateEnum.TxConfirmed:
+            case TxUseCaseState.TxCreated:
+                createShow(useCaseState.txHash!!);
+                setState(prevState => ({ ...prevState }));
+                break;
+            case TxUseCaseState.TxConfirmed:
                 setState(prevState => ({
                     ...prevState, successMessage: msg,
-                    loading: state.state === TxUseCaseStateEnum.TxConfirmed ? false : prevState.loading
+                    loading: false
                 }));
                 eventEmitter.emit('success', { type: 'success', message: msg });
                 break;
-            case TxUseCaseStateEnum.Error:
+            case TxUseCaseState.Error:
                 setState(prevState => ({ ...prevState, errorMessage: msg, loading: false }));
                 eventEmitter.emit('error', { type: 'error', message: msg });
                 break;
@@ -84,6 +91,16 @@ export const useCreateShowViewModel = () => {
                 break;
         }
     };
+
+    const createShow = async (txHash: string) => {
+        try {
+            console.log(`CreateShowViewModel::onSubmit image file=${state.image?.name}`);
+
+            showRepo!!.createShow(txHash, state.description, state.image)
+        } catch (error) {
+            console.error(error);
+        }
+    }
 
     // Handle the transaction state from the txUseCase
     useEffect(() => {
@@ -118,9 +135,11 @@ export const useCreateShowViewModel = () => {
             setState(prevState => ({ ...prevState, errors }));
 
             if (hasNoErrors(errors)) {
+                // const imageBlob = await imageFileToBase64(state.image);
+                // console.log(`CreateShowViewModel::onSubmit imageBlob=${imageBlob}`);
                 // Start the transaction use case
+                // createShow('0x1234567890123456789012345678901234567890fakeTxHash');
                 addShowTxStart();
-                return () => addShowTxAbortControllerRef.current?.abort();
             }
         }
     };

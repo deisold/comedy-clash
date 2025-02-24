@@ -22,7 +22,8 @@
     "web3": "^4.14.0"
   },
   "scripts": {
-    "dev": "concurrently \"next dev\" \"node --loader ts-node/esm ../server/server.ts\"",
+    "dev": "next dev",
+    "devBoth": "concurrently \"next dev\" \"node --loader ts-node/esm ../server/server.ts\"",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

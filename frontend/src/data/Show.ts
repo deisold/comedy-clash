@@ -1,26 +1,31 @@
+import { TxStatus } from "./TxStatus";
+
 export interface Show {
-    readonly id: number; // The id represents the show index in the Comedy Theater contract
-    readonly address: string; // The address represents the show address of the Comedy Clash contract
-    readonly submissionCount: number;
-    readonly isClosed: boolean;
+    readonly id: string; // The id represents the show address in the Comedy Theater contract
+    readonly userId: string;
     readonly description: string;
-    readonly imageUrl?: string | null;
+    readonly imageUrl: string | null;
+    readonly txHash: string;
+    readonly txStatus: typeof TxStatus[keyof typeof TxStatus];
+    readonly createdAt: Date;
 }
 
-export function createShow({ id, address, submissionCount, isClosed, description, imageUrl, createdAt }: {
-    id: number;
-    address: string;
-    submissionCount: number;
-    isClosed: boolean;
+export function toShow({ id, userId, description, imageUrl, txHash, txStatus, createdAt }: {
+    id: string;
+    userId: string;
     description: string;
     imageUrl?: string | null;
+    txHash: string;
+    txStatus: typeof TxStatus[keyof typeof TxStatus];
+    createdAt: Date;
 }): Show {
     return {
         id,
-        address,
-        submissionCount,
-        isClosed,
+        userId,
         description,
-        imageUrl,
+        imageUrl: imageUrl ?? null,
+        txHash,
+        txStatus,
+        createdAt,
     };
 }   

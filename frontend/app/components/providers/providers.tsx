@@ -20,6 +20,7 @@ interface AppContextType {
     comedyTheaterRepo: ComedyTheaterRepoType | null;
     comedyClashRepo: ComedyClashRepoType | null;
     isManager: boolean;
+    showRepo: ShowRepositoryType | null;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -33,6 +34,7 @@ export function AppProvider({ children }: AppProviderProps) {
         isLoading: boolean;
         error: unknown;
         showService: ShowServiceType | null;
+        showRepo: ShowRepositoryType | null;
         comedyTheaterRepo: ComedyTheaterRepoType | null;
         comedyClashRepo: ComedyClashRepoType | null;
         isManager: boolean;
@@ -40,6 +42,7 @@ export function AppProvider({ children }: AppProviderProps) {
         isLoading: true,
         error: null,
         showService: null,
+        showRepo: null,
         comedyTheaterRepo: null,
         comedyClashRepo: null,
         isManager: false
@@ -109,6 +112,7 @@ export function AppProvider({ children }: AppProviderProps) {
                     isLoading: false,
                     error: null,
                     showService: showService,
+                    showRepo: showRepo,
                     comedyTheaterRepo: theaterRepo,
                     comedyClashRepo: clashRepo,
                     isManager
@@ -149,6 +153,7 @@ export function AppProvider({ children }: AppProviderProps) {
     return (
         <AppContext.Provider value={{
             showService: state.showService,
+            showRepo: state.showRepo,
             comedyTheaterRepo: state.comedyTheaterRepo,
             comedyClashRepo: state.comedyClashRepo,
             isManager: state.isManager

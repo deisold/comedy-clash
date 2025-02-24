@@ -9,10 +9,18 @@ import { useCreateShowViewModel } from './CreateShowViewModel';
 import InputField from '../components/ui/InputField';
 import { buttonClassNameListCTA } from '../components/ui/styles/buttonClassNames';
 import { useDropzone } from "react-dropzone";
+import { useAppContext } from '@/app/components/providers/providers';
+import { ViewModelEventEmitter } from '../source/common/CommonEvents';
 //
 export default function CreateShow() {
     const router = useRouter();
-    const { state, actions, eventEmitter } = useCreateShowViewModel();
+    const { comedyTheaterRepo, isManager, showRepo } = useAppContext();
+    const { state, actions, eventEmitter } = useCreateShowViewModel(
+        comedyTheaterRepo!!,
+        showRepo!!,
+        isManager,
+        new ViewModelEventEmitter()
+    );
 
     useEventEmitter(eventEmitter);
 

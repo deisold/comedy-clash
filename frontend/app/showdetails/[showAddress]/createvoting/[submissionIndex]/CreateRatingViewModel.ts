@@ -5,7 +5,7 @@ import { ViewModelEventEmitter } from '@/app/source/common/CommonEvents';
 import { useBlockchainState } from '@/app/components/providers/BlockchainStateProvider';
 import _ from 'lodash';
 import { InputChangeEvent } from '@/app/source/common/CommonTypes';
-import { TxUseCaseState, TxUseCaseStateEnum, useTxUseCase } from '@/app/source/useCase/useTxUseCase';
+import { TxUseCaseState, useTxUseCase } from '@/app/source/useCase/useTxUseCase';
 import { hasNoErrors } from '@/app/source/utils/utils';
 //
 export interface CreateRatingState {
@@ -40,7 +40,6 @@ export const useCreateRatingViewModel = (showAddress: string, submissionIndex: s
     const {
         state: createVotingForSubmissionTxState,
         start: createVotingForSubmissionTxStart,
-        abortControllerRef: createVotingForSubmissionTxAbortControllerRef
     } = useTxUseCase(
         'CreateRatingViewModel::createVotingForSubmission',
         () => comedyClashRepo.createVotingForSubmission(
@@ -64,18 +63,18 @@ export const useCreateRatingViewModel = (showAddress: string, submissionIndex: s
     const handleTransactionStateChange = (state: TxUseCaseState) => {
         const { msg } = state;
         switch (state.state) {
-            case TxUseCaseStateEnum.Launched:
+            case TxUseCaseState.Launched:
                 setState(prevState => ({ ...prevState, loading: true }));
                 break;
-            case TxUseCaseStateEnum.TxCreated:
-            case TxUseCaseStateEnum.TxConfirmed:
+            case TxUseCaseState.TxCreated:
+            case TxUseCaseState.TxConfirmed:
                 setState(prevState => ({
                     ...prevState, successMessage: msg,
-                    loading: state.state === TxUseCaseStateEnum.TxConfirmed ? false : prevState.loading
+                    loading: state.state === TxUseCaseState.TxConfirmed ? false : prevState.loading
                 }));
                 eventEmitter.emit('success', { type: 'success', message: msg });
                 break;
-            case TxUseCaseStateEnum.Error:
+            case TxUseCaseState.Error:
                 setState(prevState => ({ ...prevState, errorMessage: msg, loading: false }));
                 eventEmitter.emit('error', { type: 'error', message: msg });
                 break;
@@ -125,7 +124,6 @@ export const useCreateRatingViewModel = (showAddress: string, submissionIndex: s
 
             if (hasNoErrors(errors)) {
                 createVotingForSubmissionTxStart();
-                return () => createVotingForSubmissionTxAbortControllerRef.current?.abort();
             }
         }
     };

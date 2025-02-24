@@ -10,7 +10,8 @@ export const MockComedyTheaterAdapter = (): ComedyTheaterAdapterType => {
     let amount: bigint = BigInt(5);
     return {
         getShowAmount: async () => amount,
-        getShowAdress: async (index: number) => index.toString(),
+        getShowAdress: async (index: number) => "0x0e6877867689768",
+        // getShowAdress: async (index: number) => index.toString(),
         addShow: async (description: string, durationInDays: number) => {
             await delay(defaultDelayMS);
             amount++;
