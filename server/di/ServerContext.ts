@@ -11,6 +11,11 @@ import BlockchainTxDB from "../database/model/BlockchainTxDB.js";
 import { AuthStore, AuthStoreType } from "../store/AuthStore.js";
 import { ComedyTheaterEventObserver, ComedyTheaterEventObserverType } from "../web3/ComedyTheaterEventObserver.js";
 import { initWeb3Provider } from '../web3/utils/web3.js';
+import Queue from 'bull';
+import { Queue as BullQueue } from 'bull';
+import { GenericJobData } from '../jobqueue/JobData.js';
+import { ContractTxConfirmationJobProcessor, ContractTxConfirmationJobProcessorType } from '../jobqueue/processor/ContractTxConfirmationJobProcessor.js';
+import { JobProcessor, JobProcessorType } from '../jobqueue/JobProcessor.js';
 // Remove React imports and context creation
 export interface ServerContextType {
     showRepository: ShowRepositoryType;
@@ -19,9 +24,24 @@ export interface ServerContextType {
     showRoutes: ShowRoutesType;
     authStore: AuthStoreType;
     comedyTheaterEventObserver: ComedyTheaterEventObserverType;
+    jobQueue: BullQueue<GenericJobData>;
 }
 
 const router = express.Router();
+
+// JOB QUEUE
+const jobQueue = new Queue<GenericJobData>('jobQueue', {
+    redis: {
+        host: process.env.REDIS_HOST,
+        port: parseInt(process.env.REDIS_PORT as string),
+        password: process.env.REDIS_PASSWORD
+    }
+});
+
+// JOB PROCESSOR
+const contractTxConfirmationJobProcessor: ContractTxConfirmationJobProcessorType = ContractTxConfirmationJobProcessor(BlockchainTxDB);
+const jobProcessor: JobProcessorType = JobProcessor(jobQueue, contractTxConfirmationJobProcessor);
+jobProcessor.start();
 
 // Create instances
 const authStore: AuthStoreType = AuthStore();
@@ -49,5 +69,6 @@ export const useServerContext: ServerContextType = {
     showController,
     showRoutes,
     authStore,
-    comedyTheaterEventObserver
+    comedyTheaterEventObserver,
+    jobQueue
 };

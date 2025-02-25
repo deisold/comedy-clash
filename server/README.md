@@ -11,7 +11,9 @@ The server is a Node.js/Express application that is used to manage the Comedy Cl
 - Mongoose
 - Cloudinary
 - WalletConnect
-- Infura
+- Infura,
+- Socket.io 
+- bull/redis 
 
 ## Database
 
@@ -39,11 +41,18 @@ COMEDY_THEATER_ADDRESS=
 WALLETCONNECT_PROJECT_ID=
 INFURA_ENDPOINT=
 INFURA_ENDPOINT_WS=
+REDIS_HOST=
+REDIS_PORT=
+REDIS_PASSWORD=
 USE_MOCK_MODE= // used to auto-confirm transactions after a short delay
 
 ## Development
 
-The server is developed using Cursor.ai IDE.
+# Start Redis
+
+redis-server
+
+#The server is developed using Cursor.ai IDE.
 
 Start the server with `npm run dev`
 
