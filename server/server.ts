@@ -4,7 +4,8 @@ import app from './app.js';
 import { envPath } from './utils/env_paht.js';
 import { v2 as cloudinary } from 'cloudinary';
 import { useServerContext } from './di/ServerContext.js';
-const { comedyTheaterEventObserver } = useServerContext;
+import { ComedyTheaterEventObserverType } from './web3/ComedyTheaterEventObserver.js';
+const { comedyTheaterEventObserver, comedyTheaterEventMockObserver } = useServerContext;
 //
 dotenv.config({ path: envPath });
 
@@ -23,7 +24,16 @@ async function startServer() {
     // Connect to database first
     await connectDB();
 
-    await comedyTheaterEventObserver.startObserving();
+    // Start ComedyTheaterEventObserver
+    var observer: ComedyTheaterEventObserverType;
+    if (process.env.USE_MOCK_MODE === 'true') {
+      console.log(`Server: 🔄 Starting to observe ComedyTheater events (mock mode)`);
+      observer = comedyTheaterEventMockObserver;
+    } else {
+      console.log(`Server: 🔄 Starting to observe ComedyTheater events`);
+      observer = comedyTheaterEventObserver;
+    }
+    await observer.startObserving();
 
     // Start server after successful DB connection
     const server = app.listen(PORT, () => {
@@ -35,6 +45,7 @@ async function startServer() {
       console.error(`Unhandled Rejection: ${err.message}`);
 
       comedyTheaterEventObserver.stopObserving();
+      observer.stopObserving();
 
       // Gracefully close the server
       server.close(async () => {

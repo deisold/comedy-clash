@@ -1,4 +1,4 @@
-import { Job, Queue } from "bull";
+import {Queue } from "bull";
 import { GenericJobData } from "./JobData";
 import { ContractTxConfirmationJobProcessorType } from "./processor/ContractTxConfirmationJobProcessor";
 import { ContractTxConfirmationJobData } from "./JobData";
@@ -14,7 +14,7 @@ export const JobProcessor = (jobQueue: Queue<GenericJobData>, contractTxConfirma
             console.log(`JobProcessor: Processing job: ${job.id}, type: ${job.data.type}`);
             switch (job.data.type) {
                 case 'contractTxConfirmation':
-                    const jobData = job.data as unknown as ContractTxConfirmationJobData;
+                    const jobData = job.data.data as ContractTxConfirmationJobData;
                     await contractTxConfirmationJobProcessor.process(jobData);
                     break;
                 default:
