@@ -16,7 +16,9 @@ import { Queue as BullQueue } from 'bull';
 import { GenericJobData } from '../jobqueue/JobData.js';
 import { ContractTxConfirmationJobProcessor, ContractTxConfirmationJobProcessorType } from '../jobqueue/processor/ContractTxConfirmationJobProcessor.js';
 import { JobProcessor, JobProcessorType } from '../jobqueue/JobProcessor.js';
-// 
+import { UploadFileUtils, UploadFileUtilsType } from '../web3/utils/FileUploadUtils.js';
+import { FileUploadJobProcessor, FileUploadJobProcessorType } from '../jobqueue/processor/FileUploadJobProcessor.js';
+//
 export interface ServerContextType {
     showRepository: ShowRepositoryType;
     showService: ShowServiceType;
@@ -30,6 +32,8 @@ export interface ServerContextType {
 
 const router = express.Router();
 
+const uploadFileUtils: UploadFileUtilsType = UploadFileUtils();
+
 // JOB QUEUE
 const jobQueue = new Queue<GenericJobData>('jobQueue', {
     redis: {
@@ -39,9 +43,12 @@ const jobQueue = new Queue<GenericJobData>('jobQueue', {
     }
 });
 
-// JOB PROCESSOR
+// JOB PROCESSOR Setup
 const contractTxConfirmationJobProcessor: ContractTxConfirmationJobProcessorType = ContractTxConfirmationJobProcessor(BlockchainTxDB, ShowDB);
-const jobProcessor: JobProcessorType = JobProcessor(jobQueue, contractTxConfirmationJobProcessor);
+const fileUploadJobProcessor: FileUploadJobProcessorType = FileUploadJobProcessor(BlockchainTxDB, ShowDB, uploadFileUtils);
+const jobProcessor: JobProcessorType = JobProcessor(
+    jobQueue, contractTxConfirmationJobProcessor, fileUploadJobProcessor
+);
 jobProcessor.start();
 
 // Create instances

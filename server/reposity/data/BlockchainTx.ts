@@ -5,6 +5,7 @@ export interface BlockchainTx {
     txHash: string;
     status: typeof TxStatus[keyof typeof TxStatus];
     image: Buffer | undefined;
+    imageMimeType: string | undefined;
     walletAddress: string;
     userId: string;
     timestamp: Date;
@@ -15,6 +16,7 @@ export function fromDBBlockchainTx(dbBlockchainTx: BlockchainTxDBType | null): B
         txHash: dbBlockchainTx.txHash,
         status: dbBlockchainTx.status,
         image: dbBlockchainTx.image ?? undefined,
+        imageMimeType: dbBlockchainTx.imageMimeType ?? undefined,
         walletAddress: dbBlockchainTx.walletAddress,
         userId: dbBlockchainTx.userId,
         timestamp: dbBlockchainTx.timestamp
@@ -26,6 +28,7 @@ export function toDBBlockchainTx(blockchainTx: BlockchainTx | null): BlockchainT
         txHash: blockchainTx.txHash,
         status: blockchainTx.status,
         image: blockchainTx.image ?? undefined,
+        imageMimeType: blockchainTx.imageMimeType ?? undefined,
         walletAddress: blockchainTx.walletAddress,
         userId: blockchainTx.userId,
         timestamp: blockchainTx.timestamp

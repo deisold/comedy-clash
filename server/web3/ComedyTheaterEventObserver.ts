@@ -3,7 +3,7 @@ import { BlockchainTxDBModelType } from "../database/model/BlockchainTxDB";
 import { TxStatus } from "../database/model/TxStatus";
 import { ComedyTheater__factory, ComedyTheater } from "./utils/types"
 import { WebSocketProvider, Provider } from "ethers";
-import { ContractTxConfirmationJobData, GenericJobData } from "../jobqueue/JobData";
+import { ContractTxConfirmationJobData, FileUploadJobData, GenericJobData } from "../jobqueue/JobData";
 import { Queue as BullQueue } from "bull";
 import { generateRandomHash } from "./utils/web3";
 import mongoose from 'mongoose';
@@ -48,9 +48,33 @@ export const ComedyTheaterEventObserver = (
     }
 }
 
+const launchContractTxConfirmationJob = (txHash: string, jobQueue: BullQueue<GenericJobData>) => {
+    const jobData: ContractTxConfirmationJobData = {
+        txHash: txHash,
+        contractAddress: generateRandomHash(),
+        status: TxStatus.CONFIRMED
+    };
+    // Launch contract tx confirmation job
+    console.log(`ComedyTheaterEventMockObserver: Adding job to queue: ${jobData.txHash}`);
+    jobQueue.add({
+        type: 'contractTxConfirmation',
+        data: jobData
+    });
+}
+const launchFileUploadJob = (txHash: string, jobQueue: BullQueue<GenericJobData>) => {
+    const fileUploadJobData: FileUploadJobData = {
+        txHash: txHash,
+    };
+    // Launch file upload job
+    console.log(`ComedyTheaterEventMockObserver: Adding job to queue: ${fileUploadJobData.txHash}`);
+    jobQueue.add({
+        type: 'fileUpload',
+        data: fileUploadJobData
+    });
+}
+
 export const ComedyTheaterEventMockObserver = (
-    blockchainTxDB: BlockchainTxDBModelType,
-    jobQueue: BullQueue<GenericJobData>
+    blockchainTxDB: BlockchainTxDBModelType, jobQueue: BullQueue<GenericJobData>
 ): ComedyTheaterEventObserverType => {
 
     let isObserving = false;
@@ -70,29 +94,18 @@ export const ComedyTheaterEventMockObserver = (
                 const query = lastCheckedId
                     ? { _id: { $gt: new mongoose.Types.ObjectId(lastCheckedId) }, status: TxStatus.PENDING }
                     : { status: TxStatus.PENDING };
-                const newDocs = await blockchainTxDB.find(query).sort({ _id: 1 }).exec();
+                const newPendingDocs = await blockchainTxDB.find(query).sort({ _id: 1 }).exec();
 
-                if (newDocs.length > 0) {
-                    console.log(`ComedyTheaterEventMockObserver: Found ${newDocs.length} new documents`);
+                if (newPendingDocs.length > 0) {
+                    console.log(`ComedyTheaterEventMockObserver: Found ${newPendingDocs.length} new documents`);
                     // Update the last checked ID
-                    lastCheckedId = newDocs[newDocs.length - 1]._id.toString();
+                    lastCheckedId = newPendingDocs[newPendingDocs.length - 1]._id.toString();
 
                     // Process each new document
-                    for (const data of newDocs) {
+                    for (const data of newPendingDocs) {
                         console.log(`ComedyTheaterEventMockObserver: New blockchainTxDB data inserted: ${data.txHash}`);
-
-                        if (data.status === TxStatus.PENDING) {
-                            const jobData: ContractTxConfirmationJobData = {
-                                txHash: data.txHash,
-                                contractAddress: generateRandomHash(),
-                                status: TxStatus.CONFIRMED
-                            };
-                            console.log(`ComedyTheaterEventMockObserver: Adding job to queue: ${jobData.txHash}`);
-                            jobQueue.add({
-                                type: 'contractTxConfirmation',
-                                data: jobData
-                            });
-                        }
+                        launchContractTxConfirmationJob(data.txHash, jobQueue);
+                        launchFileUploadJob(data.txHash, jobQueue);
                     }
                 }
             } catch (error) {

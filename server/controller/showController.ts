@@ -43,7 +43,8 @@ export class ShowController {
         }
         try {
             const image = req.file?.buffer;
-            const show = await this.showService.createShow(showRequestData.description, showRequestData.txHash, image);
+            const imageMimeType = req.file?.mimetype;
+            const show = await this.showService.createShow(showRequestData.description, showRequestData.txHash, image, imageMimeType);
             res.status(StatusCodes.CREATED).json(show);
         } catch (error) {
             console.error(`ShowController::createShow txHash=${showRequestData.txHash} error: ${error}`);

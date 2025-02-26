@@ -5,7 +5,8 @@
   "scripts": {
     "test": "jest",
     "start": "node --loader ts-node/esm server.ts",
-    "dev": "node --loader ts-node/esm server.ts"
+    "dev": "node --loader ts-node/esm server.ts",
+    "build": "tsc --skipLibCheck"
   },
   "keywords": [],
   "author": "",

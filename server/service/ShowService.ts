@@ -8,7 +8,7 @@ import { ShowRepositoryType } from "../reposity/ShowRepository.js";
 //
 export interface ShowServiceType {
     getShow: (id: string) => Promise<Show | null>;
-    createShow: (description: string, txHash: string, image: Buffer | undefined) => Promise<Show>;
+    createShow: (description: string, txHash: string, image: Buffer | undefined, imageMimeType: string | undefined  ) => Promise<Show>;
     uploadImage: (id: string, imageName: string, imageBase64: string) => Promise<Show>;
     updateShow: (id: string, description: string, imageUrl: string | null) => Promise<Show>;
     deleteShow: (id: string) => Promise<void>;
@@ -23,7 +23,7 @@ export const ShowService = (showRepository: ShowRepositoryType,
         return showRepository.getShow(id);
     }
 
-    const createShow = async (description: string, txHash: string, imageBuffer: Buffer | undefined) => {
+    const createShow = async (description: string, txHash: string, imageBuffer: Buffer | undefined, imageMimeType: string | undefined) => {
         const authUser = authStore.getUser();
         if (!authUser) {
             throw new Error("Auth user not found");
@@ -34,6 +34,7 @@ export const ShowService = (showRepository: ShowRepositoryType,
             txHash: txHash,
             status: TxStatus.PENDING,
             image: imageBuffer,
+            imageMimeType: imageMimeType,
             walletAddress: authUser.walletAddress,
             userId: authUser.userId,
             timestamp: new Date()

@@ -2,6 +2,7 @@ import { BlockchainTxDBModelType } from "../../database/model/BlockchainTxDB";
 import { TxStatus } from "../../database/model/TxStatus";
 import { ContractTxConfirmationJobData } from "../JobData.js";
 import { ShowDBModelType } from "../../database/model/ShowDB.js";
+//
 export type ContractTxConfirmationJobProcessorType = {
     process: (data: ContractTxConfirmationJobData) => Promise<void>;
 }
@@ -14,8 +15,6 @@ export const ContractTxConfirmationJobProcessor = (blockchainTxDB: BlockchainTxD
         try {
             const dbTx = await blockchainTxDB.findOne({ txHash: data.txHash });
             const dbShow = await showDb.findOne({ txHash: data.txHash });
-
-            console.log(`ContractTxConfirmationJobProcessor: loaded both dbTx and dbShow`);
             if (!dbTx || !dbShow) {
                 console.error(`ContractTxConfirmationJobProcessor: Transaction or show not found: ${data.txHash}`);
                 return;
