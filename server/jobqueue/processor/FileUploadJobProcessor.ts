@@ -3,6 +3,7 @@ import { BlockchainTxDBModelType } from "../../database/model/BlockchainTxDB";
 import { FileUploadJobData } from "../JobData";
 import { UploadFileUtilsType } from "../../web3/utils/FileUploadUtils";
 import { getImageBase64FromBuffer } from "../../utils/imageUtils";
+//
 export type FileUploadJobProcessorType = {
     process: (data: FileUploadJobData) => Promise<void>;
 }
