@@ -1,12 +1,12 @@
-import BlockchainTxDB from "../../database/model/BlockchainTxDB";
+import { BlockchainTxDBModelType } from "../../database/model/BlockchainTxDB";
 import { TxStatus } from "../../database/model/TxStatus";
 import { ContractTxConfirmationJobData } from "../JobData.js";
-import ShowDB from "../../database/model/ShowDB.js";
+import { ShowDBModelType } from "../../database/model/ShowDB.js";
 export type ContractTxConfirmationJobProcessorType = {
     process: (data: ContractTxConfirmationJobData) => Promise<void>;
 }
 
-export const ContractTxConfirmationJobProcessor = (blockchainTxDB: typeof BlockchainTxDB, showDb: typeof ShowDB) => {
+export const ContractTxConfirmationJobProcessor = (blockchainTxDB: BlockchainTxDBModelType, showDb: ShowDBModelType) => {
 
     async function process(data: ContractTxConfirmationJobData) {
         console.log(`ContractTxConfirmationJobProcessor: Processing job: ${JSON.stringify(data)}`);

@@ -47,7 +47,8 @@ const showSchema = new mongoose.Schema<ShowDBType>({
     }
 });
 
-const ShowDB = mongoose.model<ShowDBType>('Show', showSchema);
+export type ShowDBModelType = mongoose.Model<ShowDBType>;
+const ShowDB: ShowDBModelType = mongoose.model<ShowDBType>('Show', showSchema);
 
 // Create a unique index on the address field
 showSchema.index({ txHash: DB_ORDER_ASC });

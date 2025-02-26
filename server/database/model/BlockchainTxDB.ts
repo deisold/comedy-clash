@@ -41,6 +41,7 @@ const blockchainTxSchemaDB = new mongoose.Schema<BlockchainTxDBType>({
     }
 });
 
-const BlockchainTxDB = mongoose.model<BlockchainTxDBType>("BlockchainTxDB", blockchainTxSchemaDB);
+export type BlockchainTxDBModelType = mongoose.Model<BlockchainTxDBType>;
+const BlockchainTxDB: BlockchainTxDBModelType = mongoose.model<BlockchainTxDBType>("BlockchainTxDB", blockchainTxSchemaDB);
 
 export default BlockchainTxDB;

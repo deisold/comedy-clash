@@ -1,5 +1,5 @@
 // import type { Provider, WebSocketProvider } from "@ethersproject/providers";
-import BlockchainTxDB from "../database/model/BlockchainTxDB";
+import { BlockchainTxDBModelType } from "../database/model/BlockchainTxDB";
 import { TxStatus } from "../database/model/TxStatus";
 import { ComedyTheater__factory, ComedyTheater } from "./utils/types"
 import { WebSocketProvider, Provider } from "ethers";
@@ -49,7 +49,7 @@ export const ComedyTheaterEventObserver = (
 }
 
 export const ComedyTheaterEventMockObserver = (
-    blockchainTxDB: typeof BlockchainTxDB,
+    blockchainTxDB: BlockchainTxDBModelType,
     jobQueue: BullQueue<GenericJobData>
 ): ComedyTheaterEventObserverType => {
 

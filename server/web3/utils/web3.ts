@@ -35,3 +35,13 @@ export async function getNetwork(provider: ethers.Provider): Promise<Network | n
         return null;
     }
 }
+
+export function generateRandomHash(): string {
+    const length = 64; // 32 bytes in hexadecimal
+    const characters = 'abcdef0123456789';
+    let result = '0x';
+    for (let i = 0; i < length; i++) {
+        result += characters[Math.floor(Math.random() * characters.length)];
+    }
+    return result;
+}

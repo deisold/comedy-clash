@@ -1,5 +1,5 @@
 import { BlockchainTx, fromDBBlockchainTx, toDBBlockchainTx } from "./data/BlockchainTx.js";
-import BlockchainTxDB from "../database/model/BlockchainTxDB.js";
+import { BlockchainTxDBModelType } from "../database/model/BlockchainTxDB.js";
 //
 export type BlockchainTxRepositoryType = {
     createBlockchainTx: (blockchainTx: BlockchainTx) => Promise<BlockchainTx>,
@@ -8,7 +8,7 @@ export type BlockchainTxRepositoryType = {
     deleteBlockchainTx: (txHash: string) => Promise<void>,
 }
 
-export const BlockchainTxRepository = (db = BlockchainTxDB): BlockchainTxRepositoryType => {
+export const BlockchainTxRepository = (db: BlockchainTxDBModelType): BlockchainTxRepositoryType => {
 
     const createBlockchainTx = async (blockchainTx: BlockchainTx) => {
         const blockchainTxDB = toDBBlockchainTx(blockchainTx);

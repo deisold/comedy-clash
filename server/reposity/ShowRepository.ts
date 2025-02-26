@@ -1,4 +1,4 @@
-import ShowDB from "../database/model/ShowDB.js";
+import { ShowDBModelType } from "../database/model/ShowDB.js";
 import { fromDBShow, Show, toDBShow } from "./data/Show.js";
 //
 export type ShowRepositoryType = {
@@ -8,15 +8,15 @@ export type ShowRepositoryType = {
     deleteShow: (id: string) => Promise<void>;
 };
 //
-export const ShowRepository = (showDB = ShowDB): ShowRepositoryType => {
-   
+export const ShowRepository = (db: ShowDBModelType): ShowRepositoryType => {
+
     const createShow = async (show: Show) => {
         console.log(`ShowRepository::createShow txHash=${show.txHash}`);
         const show_db = toDBShow(show);
         if (!show_db) {
             throw new Error("Show is null");
         }
-        const newShow = await showDB.create(show_db);
+        const newShow = await db.create(show_db);
         console.log(`ShowRepository::createShow Show created=${JSON.stringify(newShow)}`);
         return fromDBShow(newShow)!!;
     }
@@ -25,7 +25,7 @@ export const ShowRepository = (showDB = ShowDB): ShowRepositoryType => {
         if (!id) {
             return null;
         }
-        const show = await showDB.findOne({ address: id });
+        const show = await db.findOne({ address: id });
         return fromDBShow(show);
     }
 
@@ -35,12 +35,12 @@ export const ShowRepository = (showDB = ShowDB): ShowRepositoryType => {
         if (!showToUpdate) {
             throw new Error("Show is null");
         }
-        const updatedShow = await showDB.findOneAndUpdate({ address: id }, showToUpdate, { new: true });
+        const updatedShow = await db.findOneAndUpdate({ address: id }, showToUpdate, { new: true });
         return fromDBShow(updatedShow)!!;
     }
 
     const deleteShow = async (id: string) => {
-        await showDB.findByIdAndDelete({ address: id });
+        await db.findByIdAndDelete({ address: id });
     }
 
     return {
