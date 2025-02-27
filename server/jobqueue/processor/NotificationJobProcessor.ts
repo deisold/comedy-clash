@@ -7,7 +7,9 @@ export type NotificationJobProcessorType = {
 
 export const NotificationJobProcessor = (getWebSocketServerInstance: () => WebSocketServerType): NotificationJobProcessorType => {
     async function process(data: NotificationJobData) {
-        console.log(`NotificationJobProcessor: Processing job: ${JSON.stringify(data)}`);
+        console.log(`🔄 NotificationJobProcessor: Processing job: ${JSON.stringify(data)}`);
+        const webSocketServerInstance = getWebSocketServerInstance();
+        webSocketServerInstance.broadcast(data.event, data.data);
     }
     return {
         process

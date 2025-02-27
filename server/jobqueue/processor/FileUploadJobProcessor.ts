@@ -1,20 +1,23 @@
 import { ShowDBModelType } from "../../database/model/ShowDB";
 import { BlockchainTxDBModelType } from "../../database/model/BlockchainTxDB";
-import { FileUploadJobData } from "../JobData";
+import { FileUploadJobData, NotificationJobData, NotificationEvent, ShowImageUploadedNotificationData } from "../JobData";
 import { UploadFileUtilsType } from "../../web3/utils/FileUploadUtils";
 import { getImageBase64FromBuffer } from "../../utils/imageUtils";
+import { Queue as BullQueue } from "bull";
+import { GenericJobData } from "../JobData";
 //
 export type FileUploadJobProcessorType = {
     process: (data: FileUploadJobData) => Promise<void>;
 }
 
 export const FileUploadJobProcessor = (
+    jobQueue: BullQueue<GenericJobData>,
     blockchainTxDB: BlockchainTxDBModelType,
     showDb: ShowDBModelType,
     uploadFileUtils: UploadFileUtilsType,
 ): FileUploadJobProcessorType => {
     async function process(data: FileUploadJobData) {
-        console.log(`FileUploadJobProcessor: Processing job: ${JSON.stringify(data)}`);
+        console.log(`🔄 FileUploadJobProcessor: Processing job: ${JSON.stringify(data)}`);
 
         try {
             const dbTx = await blockchainTxDB.findOne({ txHash: data.txHash });
@@ -45,7 +48,18 @@ export const FileUploadJobProcessor = (
             console.log(`FileUploadJobProcessor: Blockchain tx updated: ${JSON.stringify(updatedTx)}`);
 
             // Signal on web socket
-
+            const notificationJobData: NotificationJobData = {
+                jobId: data.jobId,
+                event: NotificationEvent.SHOW_IMAGE_UPLOADED,
+                txHash: data.txHash,
+                data: {
+                    showImageUrl: secureImageUrl
+                } as ShowImageUploadedNotificationData
+            }
+            jobQueue.add({
+                type: 'notification',
+                data: notificationJobData
+            });
         } catch (error) {
             console.error(`FileUploadJobProcessor: Error processing job: ${data.jobId}, txHash=${data.txHash}, error msg=${error instanceof Error ? error.message : "Unknown error"}`);
         }

@@ -1,8 +1,4 @@
-import https from "https";
-import fs from "fs";
-import express from "express";
 import { WebSocketServer, WebSocket } from "ws";
-import { Server } from 'http';
 //
 export interface WebSocketServerType {
     start: () => void;
@@ -21,7 +17,7 @@ export const WebSocketServerInstance = (createWebSocketServer: () => WebSocketSe
     // Start WebSocket Server
     const start = () => {
         if (wss) {
-            console.warn("WebSocket server is already running.");
+            console.warn("WSS: WebSocket server is already running.");
             return;
         }
 
@@ -30,29 +26,29 @@ export const WebSocketServerInstance = (createWebSocketServer: () => WebSocketSe
         wss = createWebSocketServer();
 
         wss.on("connection", (ws) => {
-            console.log("🔗 WebSocket client connected");
+            console.log("🔗 WSS: WebSocket client connected");
 
             // Handle incoming messages
             ws.on("message", (message) => {
-                console.log("📩 Received:", message.toString());
+                console.log("📩 WSS: Received:", message.toString());
                 try {
                     const { type, payload } = JSON.parse(message.toString());
                     if (eventHandlers[type]) {
                         eventHandlers[type](ws, payload);
                     }
                 } catch (error) {
-                    console.error("Error parsing message:", error);
+                    console.error("WSS: Error parsing message:", error);
                 }
             });
 
             // Handle client disconnects
             ws.on("close", () => {
-                console.log("❌ WebSocket client disconnected");
+                console.log("❌ WSS: WebSocket client disconnected");
             });
 
             // Handle errors
             ws.on("error", (error) => {
-                console.error("WebSocket error:", error);
+                console.error("WSS: WebSocket error:", error);
             });
         });
 
@@ -65,7 +61,7 @@ export const WebSocketServerInstance = (createWebSocketServer: () => WebSocketSe
     // Stop WebSocket Server
     const stop = () => {
         if (wss) {
-            console.log("🔴 Stopping WebSocket server...");
+            console.log("🔴 WSS: Stopping WebSocket server...");
             wss.close();
             wss = null;
         }
@@ -74,19 +70,32 @@ export const WebSocketServerInstance = (createWebSocketServer: () => WebSocketSe
     // Emit message to a single client
     const emit = (ws: WebSocket, type: string, payload: any) => {
         if (ws.readyState === WebSocket.OPEN) {
-            ws.send(JSON.stringify({ type, payload }));
+            try {
+                ws.send(JSON.stringify({ type, payload }));
+            } catch (error) {
+                console.error("WSS: Error sending message to client:", error);
+            }
         }
     };
 
     // Broadcast message to all clients
     const broadcast = (type: string, payload: any) => {
         if (wss) {
-            console.log(`🔄 Broadcasting message to all clients: ${type}, ${payload}`);
-            wss.clients.forEach((client) => {
-                if (client.readyState === WebSocket.OPEN) {
-                    client.send(JSON.stringify({ type, payload }));
-                }
-            });
+            console.log(`🔄 WSS: Broadcasting message to all clients (${wss.clients.size}): ${type}, ${payload}`);
+            if (wss.clients.size > 0) {
+                const message = JSON.stringify({ type, payload });
+                wss.clients.forEach((client) => {
+                    if (client.readyState === WebSocket.OPEN) {
+                        try {
+                            client.send(message);
+                        } catch (error) {
+                            console.error("WSS: Error sending message to client:", error);
+                        }
+                    }
+                });
+            } else {
+                console.warn("WSS: No clients connected to broadcast message");
+            }
         }
     };
 

@@ -16,8 +16,10 @@ export const NotificationEvent = {
     SHOW_IMAGE_UPLOADED: "SHOW_IMAGE_UPLOADED",
 } as const;
 
-export interface ShowNotificationData {
+export interface ShowCreatedNotificationData {
     showId: string | null;
+}
+export interface ShowImageUploadedNotificationData {
     showImageUrl: string | null;
 }
 
@@ -25,7 +27,7 @@ export interface NotificationJobData {
     jobId?: number | string;
     event: typeof NotificationEvent[keyof typeof NotificationEvent];
     txHash: string;
-    data: ShowNotificationData;
+    data: ShowCreatedNotificationData | ShowImageUploadedNotificationData;
 }
 
 export interface GenericJobData {

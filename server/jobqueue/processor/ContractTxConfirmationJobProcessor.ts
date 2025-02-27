@@ -1,16 +1,18 @@
 import { BlockchainTxDBModelType } from "../../database/model/BlockchainTxDB";
 import { TxStatus } from "../../database/model/TxStatus";
-import { ContractTxConfirmationJobData } from "../JobData.js";
+import { ContractTxConfirmationJobData, NotificationJobData, NotificationEvent, ShowCreatedNotificationData } from "../JobData.js";
 import { ShowDBModelType } from "../../database/model/ShowDB.js";
+import { Queue as BullQueue } from "bull";
+import { GenericJobData } from "../JobData";
 //
 export type ContractTxConfirmationJobProcessorType = {
     process: (data: ContractTxConfirmationJobData) => Promise<void>;
 }
 
-export const ContractTxConfirmationJobProcessor = (blockchainTxDB: BlockchainTxDBModelType, showDb: ShowDBModelType) => {
+export const ContractTxConfirmationJobProcessor = (jobQueue: BullQueue<GenericJobData>, blockchainTxDB: BlockchainTxDBModelType, showDb: ShowDBModelType) => {
 
     async function process(data: ContractTxConfirmationJobData) {
-        console.log(`ContractTxConfirmationJobProcessor: Processing job: ${JSON.stringify(data)}`);
+        console.log(`🔄 ContractTxConfirmationJobProcessor: Processing job: ${JSON.stringify(data)}`);
 
         try {
             const dbTx = await blockchainTxDB.findOne({ txHash: data.txHash });
@@ -38,8 +40,21 @@ export const ContractTxConfirmationJobProcessor = (blockchainTxDB: BlockchainTxD
                     const { image, ...rest } = dbTxUpdateResult;
                     console.log(`ContractTxConfirmationJobProcessor: Transaction saved: ${data.txHash} with ${JSON.stringify(rest)}`);
                     console.log(`ContractTxConfirmationJobProcessor: Show saved: ${data.txHash} with ${JSON.stringify(dbShowUpdateResult)}`);
-                    // TODO: Signal on web socket
 
+                    // TODO: Signal on web socket
+                    const notificationJobData: NotificationJobData = {
+                        jobId: data.jobId,
+                        event: NotificationEvent.SHOW_TX_CONFIRMED,
+                        txHash: data.txHash,
+                        data: {
+                            showId: data.contractAddress,
+                            
+                        } as ShowCreatedNotificationData
+                    }
+                    jobQueue.add({
+                        type: 'notification',
+                        data: notificationJobData
+                    });
                     break;
                 default:
                     console.error(`ContractTxConfirmationJobProcessor: Unknown transaction status: ${dbTx.status}`);

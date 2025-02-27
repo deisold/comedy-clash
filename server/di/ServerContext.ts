@@ -50,8 +50,8 @@ const jobQueue = new Queue<GenericJobData>('jobQueue', {
 });
 
 // JOB PROCESSOR Setup
-const contractTxConfirmationJobProcessor: ContractTxConfirmationJobProcessorType = ContractTxConfirmationJobProcessor(BlockchainTxDB, ShowDB);
-const fileUploadJobProcessor: FileUploadJobProcessorType = FileUploadJobProcessor(BlockchainTxDB, ShowDB, uploadFileUtils);
+const contractTxConfirmationJobProcessor: ContractTxConfirmationJobProcessorType = ContractTxConfirmationJobProcessor(jobQueue,BlockchainTxDB, ShowDB);
+const fileUploadJobProcessor: FileUploadJobProcessorType = FileUploadJobProcessor(jobQueue, BlockchainTxDB, ShowDB, uploadFileUtils);
 const notificationJobProcessor: NotificationJobProcessorType = NotificationJobProcessor(() => getWebSocketServerInstance());
 const jobQueueProcessor: JobQueueProcessorType = JobQueueProcessor(
     jobQueue, contractTxConfirmationJobProcessor, fileUploadJobProcessor, notificationJobProcessor
