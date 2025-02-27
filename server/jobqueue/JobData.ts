@@ -11,9 +11,26 @@ export interface FileUploadJobData {
     txHash: string;
 }
 
+export const NotificationEvent = {
+    SHOW_TX_CONFIRMED: "SHOW_TX_CONFIRMED",
+    SHOW_IMAGE_UPLOADED: "SHOW_IMAGE_UPLOADED",
+} as const;
+
+export interface ShowNotificationData {
+    showId: string | null;
+    showImageUrl: string | null;
+}
+
+export interface NotificationJobData {
+    jobId?: number | string;
+    event: typeof NotificationEvent[keyof typeof NotificationEvent];
+    txHash: string;
+    data: ShowNotificationData;
+}
+
 export interface GenericJobData {
-    type: 'contractTxConfirmation' | 'fileUpload';
-    data: ContractTxConfirmationJobData | FileUploadJobData;
+    type: 'contractTxConfirmation' | 'fileUpload' | 'notification';
+    data: ContractTxConfirmationJobData | FileUploadJobData | NotificationJobData;
 }
 
 

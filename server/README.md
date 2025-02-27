@@ -33,6 +33,8 @@ The server uses environment variables to configure the application.
 
 The environment variables are stored in the `.env` file.
 
+SERVER_HOST=
+SERVER_PORT=
 MONGO_URI=
 CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
@@ -44,13 +46,29 @@ INFURA_ENDPOINT_WS=
 REDIS_HOST=
 REDIS_PORT=
 REDIS_PASSWORD=
+USE_HTTPS=true
+SSL_KEY_PATH=ssl/key.pem
+SSL_CERT_PATH=ssl/cert.pem
 USE_MOCK_MODE= // used to auto-confirm transactions after a short delay
+
+## HTTPS
+
+The server uses HTTPS to secure the connection between the client and the server.
+
+The SSL certificate and key are stored in the `ssl` folder.
+
+# Create the ssl directory
+`mkdir -p ssl`
+
+# Generate certificates in this directory
+`openssl genrsa -out ssl/key.pem 2048`
+`openssl req -new -x509 -key ssl/key.pem -out ssl/cert.pem -days 365`
 
 ## Development
 
 # Start Redis
 
-redis-server
+`redis-server`
 
 #The server is developed using Cursor.ai IDE.
 

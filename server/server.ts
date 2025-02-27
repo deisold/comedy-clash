@@ -3,9 +3,15 @@ import dotenv from 'dotenv';
 import app from './app.js';
 import { envPath } from './utils/env_paht.js';
 import { v2 as cloudinary } from 'cloudinary';
-import { useServerContext } from './di/ServerContext.js';
+import { setWebSocketServerInstance, useServerContext } from './di/ServerContext.js';
 import { ComedyTheaterEventObserverType } from './web3/ComedyTheaterEventObserver.js';
-const { comedyTheaterEventObserver, comedyTheaterEventMockObserver } = useServerContext;
+import { WebSocketServerInstance } from './websocket/WebSocketServer.js';
+import fs from 'fs';
+import path from 'path';
+import http from 'http';
+import https, { Server as HttpsServer } from 'https';
+import { WebSocketServer } from 'ws';
+const { comedyTheaterEventObserver, comedyTheaterEventMockObserver, jobQueueProcessor } = useServerContext;
 //
 dotenv.config({ path: envPath });
 
@@ -16,8 +22,30 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 //
-const PORT = 5000;
+const HOST = process.env.SERVER_HOST || 'localhost';
+const PORT = process.env.SERVER_PORT || 5000;
 
+function startServerAndListen(): http.Server | HttpsServer {
+  let server: http.Server | HttpsServer;
+
+  if (process.env.USE_HTTPS === 'true') {
+    // HTTPS configuration
+    const options = {
+      key: fs.readFileSync(path.resolve(process.env.SSL_KEY_PATH || 'ssl/key.pem')),
+      cert: fs.readFileSync(path.resolve(process.env.SSL_CERT_PATH || 'ssl/cert.pem'))
+    };
+
+    server = https.createServer(options, app).listen(PORT, () => {
+      console.log(`✅ Secure server running on https://${HOST}:${PORT}`);
+    });
+  } else {
+    // Standard HTTP server
+    server = app.listen(PORT, () => {
+      console.log(`✅ Server running on http://${HOST}:${PORT}`);
+    });
+  }
+  return server;
+}
 // Create a startup function to handle async operations
 async function startServer() {
   try {
@@ -36,9 +64,16 @@ async function startServer() {
     await observer.startObserving();
 
     // Start server after successful DB connection
-    const server = app.listen(PORT, () => {
-      console.log(`✅ Server running on http://localhost:${PORT}`);
+    let server: http.Server | HttpsServer = startServerAndListen();
+
+    const webSocketServerInstance = WebSocketServerInstance(() => {
+      return new WebSocketServer({ server });
     });
+    // Set the webSocketServerInstance for DI
+    setWebSocketServerInstance(webSocketServerInstance);
+    webSocketServerInstance.start();
+
+    jobQueueProcessor.start();
 
     // Handle Unhandled Promise Rejections
     process.on("unhandledRejection", (err: Error) => {
@@ -49,7 +84,7 @@ async function startServer() {
 
       // Gracefully close the server
       server.close(async () => {
-        console.log("Shutting down gracefully...");
+        console.log("🔴 Shutting down gracefully...");
         process.exit(1);
       });
     });
