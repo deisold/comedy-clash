@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { useAppContext } from '@/app/components/providers/providers';
+import { useAppContext } from '@/app/components/providers/AppProvider';
 import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import RetryButton from '../ui/RetryButton';

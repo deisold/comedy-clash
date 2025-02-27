@@ -1,4 +1,4 @@
-import { useAppContext } from '@/app/components/providers/providers';
+import { useAppContext } from '@/app/components/providers/AppProvider';
 import { validateRatingInputUseCase, RatingInputErrorMessages } from './useCases/ValidateRatingInput';
 import { useState, useRef, useEffect } from 'react';
 import { ViewModelEventEmitter } from '@/app/source/common/CommonEvents';

@@ -2,7 +2,7 @@ import React from 'react';
 import './styles/globals.css';  // Import global Tailwind styles
 
 import { BlockchainStateProvider } from './components/providers/BlockchainStateProvider'
-import { AppProvider } from './components/providers/providers'
+import { AppProvider } from './components/providers/AppProvider'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Header from './components/ui/Header';

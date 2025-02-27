@@ -3,7 +3,7 @@
 "use client"
 
 import React, { useState, useEffect } from 'react';
-import { useAppContext } from '@/app/components/providers/providers'
+import { useAppContext } from '@/app/components/providers/AppProvider'
 import { useParams, useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import SubmissionListItem from '@/app/components/submission-listitem/submission-listitem'

@@ -1,7 +1,7 @@
 "use client"
 
 import React, { useEffect, useState } from 'react';
-import { useAppContext } from '@/app/components/providers/providers';
+import { useAppContext } from '@/app/components/providers/AppProvider';
 import { useRouter } from 'next/navigation';
 import ShowListItem from '../showlistitem/showlistitem'
 

@@ -9,7 +9,7 @@ import { useCreateShowViewModel } from './CreateShowViewModel';
 import InputField from '../components/ui/InputField';
 import { buttonClassNameListCTA } from '../components/ui/styles/buttonClassNames';
 import { useDropzone } from "react-dropzone";
-import { useAppContext } from '@/app/components/providers/providers';
+import { useAppContext } from '@/app/components/providers/AppProvider';
 import { ViewModelEventEmitter } from '../source/common/CommonEvents';
 //
 export default function CreateShow() {

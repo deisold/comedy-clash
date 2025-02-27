@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { SubmissionInputErrorMessages, validateSubmissionInputUseCase } from "./useCases/ValidateRatingInput";
 import { useBlockchainState } from "@/app/components/providers/BlockchainStateProvider";
 import { TxUseCaseState, useTxUseCase } from "@/app/source/useCase/useTxUseCase";
-import { useAppContext } from "@/app/components/providers/providers";
+import { useAppContext } from "@/app/components/providers/AppProvider";
 import { InputChangeEvent } from "@/app/source/common/CommonTypes";
 import { ViewModelEventEmitter } from "@/app/source/common/CommonEvents";
 import { hasNoErrors } from "@/app/source/utils/utils";

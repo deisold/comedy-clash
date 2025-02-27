@@ -5,7 +5,7 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 
-import { useAppContext } from '@/app/components/providers/providers';
+import { useAppContext } from '@/app/components/providers/AppProvider';
 import { useRouter, useParams } from 'next/navigation';
 import { useBlockchainState } from '../providers/BlockchainStateProvider';
 import { Submission } from '@/app/source/data/submission';
