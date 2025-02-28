@@ -1,10 +1,10 @@
-import { ShowDBModelType } from "../../database/model/ShowDB";
-import { BlockchainTxDBModelType } from "../../database/model/BlockchainTxDB";
-import { FileUploadJobData, NotificationJobData, NotificationEvent, ShowImageUploadedNotificationData } from "../JobData";
+import { FileUploadJobData, NotificationJobData, NotificationEventType, ShowImageUploadedNotificationData } from "../JobData";
 import { UploadFileUtilsType } from "../../web3/utils/FileUploadUtils";
 import { getImageBase64FromBuffer } from "../../utils/imageUtils";
 import { Queue as BullQueue } from "bull";
 import { GenericJobData } from "../JobData";
+import { BlockchainTxRepositoryType } from "../../reposity/BlockchainTxRepository";
+import { ShowRepositoryType } from "../../reposity/ShowRepository";
 //
 export type FileUploadJobProcessorType = {
     process: (data: FileUploadJobData) => Promise<void>;
@@ -12,16 +12,16 @@ export type FileUploadJobProcessorType = {
 
 export const FileUploadJobProcessor = (
     jobQueue: BullQueue<GenericJobData>,
-    blockchainTxDB: BlockchainTxDBModelType,
-    showDb: ShowDBModelType,
+    blockchainTxRepo: BlockchainTxRepositoryType,
+    showRepository: ShowRepositoryType,
     uploadFileUtils: UploadFileUtilsType,
 ): FileUploadJobProcessorType => {
     async function process(data: FileUploadJobData) {
         console.log(`🔄 FileUploadJobProcessor: Processing job: ${JSON.stringify(data)}`);
 
         try {
-            const dbTx = await blockchainTxDB.findOne({ txHash: data.txHash });
-            const dbShow = await showDb.findOne({ txHash: data.txHash });
+            const dbTx = await blockchainTxRepo.getByTxHash(data.txHash);
+            const dbShow = await showRepository.getShowByTxHash(data.txHash);
             if (!dbTx || !dbShow) {
                 console.error(`FileUploadJobProcessor: Transaction or show not found: ${data.txHash}`);
                 return;
@@ -37,20 +37,17 @@ export const FileUploadJobProcessor = (
             console.log(`FileUploadJobProcessor: File uploaded: secureImageUrl=${secureImageUrl}`);
 
             // Update show with secure image url
-            const updatedShow = await showDb.updateOne({ txHash: data.txHash, imageUrl: secureImageUrl });
+            const updatedShow = await showRepository.updateShowByParams(data.txHash, { imageUrl: secureImageUrl });
             console.log(`FileUploadJobProcessor: Show updated: ${JSON.stringify(updatedShow)}`);
 
             // Update blockchain tx and remove image
-            const updatedTx = await blockchainTxDB.updateOne(
-                { txHash: data.txHash },
-                { $unset: { image: "", imageMimeType: "" } }
-            );
+            const updatedTx = await blockchainTxRepo.deleteImageForTxHash(data.txHash);
             console.log(`FileUploadJobProcessor: Blockchain tx updated: ${JSON.stringify(updatedTx)}`);
 
             // Signal on web socket
             const notificationJobData: NotificationJobData = {
                 jobId: data.jobId,
-                event: NotificationEvent.SHOW_IMAGE_UPLOADED,
+                eventType: NotificationEventType.SHOW_IMAGE_UPLOADED,
                 txHash: data.txHash,
                 data: {
                     showImageUrl: secureImageUrl
