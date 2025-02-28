@@ -24,6 +24,11 @@ export const WebSocketServerInstance = (createWebSocketServer: () => WebSocketSe
         console.log(`✅ Starting WSS server on port ${process.env.SERVER_PORT}...`);
         // Create WebSocket server and attach it to the same HTTPS server
         wss = createWebSocketServer();
+        if (!wss) {
+            console.error("WSS: Failed to create WebSocket server");
+            return;
+        }
+        console.log(`✅ WSS: WebSocket server created`);
 
         wss.on("connection", (ws) => {
             console.log("🔗 WSS: WebSocket client connected");
@@ -51,11 +56,6 @@ export const WebSocketServerInstance = (createWebSocketServer: () => WebSocketSe
                 console.error("WSS: WebSocket error:", error);
             });
         });
-
-        // // Start the server (HTTPS + WebSocket)
-        // server.listen(port, () => {
-        //     console.log(`Secure WebSocket server running on wss://localhost:${port}`);
-        // });
     };
 
     // Stop WebSocket Server
@@ -80,22 +80,24 @@ export const WebSocketServerInstance = (createWebSocketServer: () => WebSocketSe
 
     // Broadcast message to all clients
     const broadcast = (type: string, payload: any) => {
-        if (wss) {
-            console.log(`🔄 WSS: Broadcasting message to all clients (${wss.clients.size}): ${type}, ${payload}`);
-            if (wss.clients.size > 0) {
-                const message = JSON.stringify({ type, payload });
-                wss.clients.forEach((client) => {
-                    if (client.readyState === WebSocket.OPEN) {
-                        try {
-                            client.send(message);
-                        } catch (error) {
-                            console.error("WSS: Error sending message to client:", error);
-                        }
+        if (!wss) {
+            console.warn("WSS: Cannot broadcast - WebSocket server is not running. Call start() first.");
+            return;
+        }
+        console.log(`🔄 WSS: Broadcasting message to all clients (${wss.clients.size}): type: ${type}, payload: ${payload}`);
+        if (wss.clients.size > 0) {
+            const message = JSON.stringify({ type, payload });
+            wss.clients.forEach((client) => {
+                if (client.readyState === WebSocket.OPEN) {
+                    try {
+                        client.send(message);
+                    } catch (error) {
+                        console.error("WSS: Error sending message to client:", error);
                     }
-                });
-            } else {
-                console.warn("WSS: No clients connected to broadcast message");
-            }
+                }
+            });
+        } else {
+            console.warn("WSS: No clients connected to broadcast message");
         }
     };
 

@@ -1,0 +1,30 @@
+import { NotificationJobData } from "../jobqueue/JobData";
+//
+export const NotificationEventType = {
+    SHOW_TX_CONFIRMED: "SHOW_TX_CONFIRMED",
+    SHOW_IMAGE_UPLOADED: "SHOW_IMAGE_UPLOADED",
+} as const;
+
+export interface ShowCreatedNotificationData {
+    showId: string | null;
+}
+export interface ShowImageUploadedNotificationData {
+    showImageUrl: string | null;
+}
+
+export interface NotificationEventData {
+    eventType: typeof NotificationEventType[keyof typeof NotificationEventType];
+    txHash: string;
+    data: ShowCreatedNotificationData | ShowImageUploadedNotificationData;
+}
+
+export function fromNotificationJobData(notificationJobData: NotificationJobData): NotificationEventData {
+    return {
+        eventType: notificationJobData.eventType,
+        txHash: notificationJobData.txHash,
+        data: notificationJobData.data
+    }
+}
+
+
+
