@@ -31,7 +31,8 @@ export interface ServerContextType {
     comedyTheaterEventMockObserver: ComedyTheaterEventObserverType;
     jobQueue: BullQueue<GenericJobData>;
     jobQueueProcessor: JobQueueProcessorType;
-    get webSocketServerInstance(): WebSocketServerType;
+    setWebSocketServerInstance: (wssInstance: WebSocketServerType) => void;
+    getWebSocketServerInstance: () => WebSocketServerType;
 }
 
 let webSocketServerInstance: WebSocketServerType | null = null;
@@ -49,13 +50,7 @@ const jobQueue = new Queue<GenericJobData>('jobQueue', {
     }
 });
 
-// JOB PROCESSOR Setup
-const contractTxConfirmationJobProcessor: ContractTxConfirmationJobProcessorType = ContractTxConfirmationJobProcessor(jobQueue,BlockchainTxDB, ShowDB);
-const fileUploadJobProcessor: FileUploadJobProcessorType = FileUploadJobProcessor(jobQueue, BlockchainTxDB, ShowDB, uploadFileUtils);
-const notificationJobProcessor: NotificationJobProcessorType = NotificationJobProcessor(() => getWebSocketServerInstance());
-const jobQueueProcessor: JobQueueProcessorType = JobQueueProcessor(
-    jobQueue, contractTxConfirmationJobProcessor, fileUploadJobProcessor, notificationJobProcessor
-);
+
 // Create instances
 const authStore: AuthStoreType = AuthStore();
 //
@@ -70,12 +65,17 @@ const showService: ShowServiceType = ShowService(showRepository, blockchainTxRep
 const showController: ShowController = new ShowController(showService);
 const showRoutes: ShowRoutesType = ShowRoutes(showController, router);
 
-export function setWebSocketServerInstance(webSocketServerInstance: WebSocketServerType): void {
-    webSocketServerInstance = webSocketServerInstance;
-}
+// JOB PROCESSOR Setup
+const contractTxConfirmationJobProcessor: ContractTxConfirmationJobProcessorType = ContractTxConfirmationJobProcessor(jobQueue, blockchainTxRepository, showRepository);
+const fileUploadJobProcessor: FileUploadJobProcessorType = FileUploadJobProcessor(jobQueue, blockchainTxRepository, showRepository, uploadFileUtils);
+const notificationJobProcessor: NotificationJobProcessorType = NotificationJobProcessor(getWebSocketServerInstance);
+const jobQueueProcessor: JobQueueProcessorType = JobQueueProcessor(
+    jobQueue, contractTxConfirmationJobProcessor, fileUploadJobProcessor, notificationJobProcessor
+);
 
 function getWebSocketServerInstance(): WebSocketServerType {
     if (!webSocketServerInstance) {
+        console.error('🔴 NotificationJobProcessor: WebSocket server instance not initialized');
         throw new Error('WebSocket server instance not initialized');
     }
     return webSocketServerInstance;
@@ -91,7 +91,14 @@ export const useServerContext: ServerContextType = {
     comedyTheaterEventMockObserver,
     jobQueue,
     jobQueueProcessor,
-    get webSocketServerInstance() {
-        return getWebSocketServerInstance();
+    setWebSocketServerInstance: (wssInstance: WebSocketServerType) => {
+        webSocketServerInstance = wssInstance;
+    },
+    getWebSocketServerInstance: () => {
+        if (!webSocketServerInstance) {
+            console.warn('⚠️ WebSocket server instance accessed before initialization');
+            return null as unknown as WebSocketServerType; // Return null but cast to expected type
+        }
+        return webSocketServerInstance;
     }
 };

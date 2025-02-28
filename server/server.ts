@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import app from './app.js';
 import { envPath } from './utils/env_paht.js';
 import { v2 as cloudinary } from 'cloudinary';
-import { setWebSocketServerInstance, useServerContext } from './di/ServerContext.js';
+import { useServerContext } from './di/ServerContext.js';
 import { ComedyTheaterEventObserverType } from './web3/ComedyTheaterEventObserver.js';
 import { WebSocketServerInstance } from './websocket/WebSocketServer.js';
 import fs from 'fs';
@@ -11,7 +11,7 @@ import path from 'path';
 import http from 'http';
 import https, { Server as HttpsServer } from 'https';
 import { WebSocketServer } from 'ws';
-const { comedyTheaterEventObserver, comedyTheaterEventMockObserver, jobQueueProcessor } = useServerContext;
+const { comedyTheaterEventObserver, comedyTheaterEventMockObserver, jobQueueProcessor, setWebSocketServerInstance } = useServerContext;
 //
 dotenv.config({ path: envPath });
 
@@ -52,6 +52,16 @@ async function startServer() {
     // Connect to database first
     await connectDB();
 
+    // Start server after successful DB connection
+    let server: http.Server | HttpsServer = startServerAndListen();
+
+    const webSocketServerInstance = WebSocketServerInstance(() => {
+      return new WebSocketServer({ server });
+    });
+    // Set the webSocketServerInstance for DI
+    setWebSocketServerInstance(webSocketServerInstance);
+    webSocketServerInstance.start();
+
     // Start ComedyTheaterEventObserver
     var observer: ComedyTheaterEventObserverType;
     if (process.env.USE_MOCK_MODE === 'true') {
@@ -62,16 +72,6 @@ async function startServer() {
       observer = comedyTheaterEventObserver;
     }
     await observer.startObserving();
-
-    // Start server after successful DB connection
-    let server: http.Server | HttpsServer = startServerAndListen();
-
-    const webSocketServerInstance = WebSocketServerInstance(() => {
-      return new WebSocketServer({ server });
-    });
-    // Set the webSocketServerInstance for DI
-    setWebSocketServerInstance(webSocketServerInstance);
-    webSocketServerInstance.start();
 
     jobQueueProcessor.start();
 
