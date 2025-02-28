@@ -14,6 +14,7 @@ import axios from 'axios';
 import { ShowApiAdapter } from '../../source/adapters/api/ShowApiAdapter';
 import { ShowRepository, ShowRepositoryType } from '../../source/repositories/ShowRepo';
 import { ShowService, ShowServiceType } from '../../source/service/ShowService';
+import { WebSocketInstance, WebSocketInstanceType } from '../../source/websocket/Websocket';
 //
 interface AppContextType {
     showService: ShowServiceType | null;
@@ -21,6 +22,7 @@ interface AppContextType {
     comedyClashRepo: ComedyClashRepoType | null;
     isManager: boolean;
     showRepo: ShowRepositoryType | null;
+    websocket: WebSocketInstanceType | null;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -38,6 +40,7 @@ export function AppProvider({ children }: AppProviderProps) {
         comedyTheaterRepo: ComedyTheaterRepoType | null;
         comedyClashRepo: ComedyClashRepoType | null;
         isManager: boolean;
+        websocket: WebSocketInstanceType | null;
     }>({
         isLoading: true,
         error: null,
@@ -45,7 +48,8 @@ export function AppProvider({ children }: AppProviderProps) {
         showRepo: null,
         comedyTheaterRepo: null,
         comedyClashRepo: null,
-        isManager: false
+        isManager: false,
+        websocket: null
     });
 
     const { isLoading: blockchainInitLoading, provider, signer, error: blockchainError } = useBlockchainState();
@@ -76,14 +80,37 @@ export function AppProvider({ children }: AppProviderProps) {
                 if (!comedyTheaterAddress) {
                     throw new Error('Comedy Theater contract address not configured');
                 }
+                const useHttps = JSON.parse(process.env.NEXT_PUBLIC_USE_HTTPS as string);
+                //
+                const apiHost = process.env.NEXT_PUBLIC_API_HOST;
+                const apiPort = process.env.NEXT_PUBLIC_API_PORT;
+                const apiPath = process.env.NEXT_PUBLIC_API_PATH;
+                if (!apiHost || !apiPort || !apiPath) {
+                    throw new Error('API configuration is missing');
+                }
+                const protocolApi = useHttps ? 'https://' : 'http://';
+                const apiUrl = `${protocolApi}${apiHost}:${apiPort}${apiPath}`;
 
                 const httpClient = axios.create({
-                    baseURL: process.env.NEXT_PUBLIC_API_URL,
+                    baseURL: apiUrl,
                     headers: {
                         'Content-Type': 'application/json'
                     }
                 });
+                const websocketHost = process.env.NEXT_PUBLIC_WEBSOCKET_HOST;
+                const websocketPort = process.env.NEXT_PUBLIC_WEBSOCKET_PORT;
+                const websocketMaxRetries = process.env.NEXT_PUBLIC_WEBSOCKET_MAX_RETRIES;
+                const websocketRetryDelayMs = process.env.NEXT_PUBLIC_WEBSOCKET_RETRY_DELAY_MS;
+                if (!websocketHost || !websocketPort || !websocketMaxRetries || !websocketRetryDelayMs) {
+                    throw new Error('WebSocket configuration is missing');
+                }
+                //
+                const protocolWebSocket = useHttps ? 'wss://' : 'ws://';
+                const websocketUrl = `${protocolWebSocket}${websocketHost}:${websocketPort}`;
 
+                const websocket = WebSocketInstance(websocketUrl, parseInt(websocketMaxRetries), parseInt(websocketRetryDelayMs));
+                websocket.start();
+                //
                 const showApiAdapter = ShowApiAdapter(httpClient);
                 const showRepo = ShowRepository(showApiAdapter);
 
@@ -115,7 +142,8 @@ export function AppProvider({ children }: AppProviderProps) {
                     showRepo: showRepo,
                     comedyTheaterRepo: theaterRepo,
                     comedyClashRepo: clashRepo,
-                    isManager
+                    isManager: isManager,
+                    websocket: websocket
                 });
             } catch (error: any) {
                 console.error('Failed to initialize repositories:', error);
@@ -156,7 +184,8 @@ export function AppProvider({ children }: AppProviderProps) {
             showRepo: state.showRepo,
             comedyTheaterRepo: state.comedyTheaterRepo,
             comedyClashRepo: state.comedyClashRepo,
-            isManager: state.isManager
+            isManager: state.isManager,
+            websocket: state.websocket
         }}>
             {children}
         </AppContext.Provider>
