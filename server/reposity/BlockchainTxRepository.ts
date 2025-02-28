@@ -1,10 +1,20 @@
 import { BlockchainTx, fromDBBlockchainTx, toDBBlockchainTx } from "./data/BlockchainTx.js";
 import { BlockchainTxDBModelType } from "../database/model/BlockchainTxDB.js";
+import { TxStatus } from "../database/model/TxStatus.js";
 //
 export type BlockchainTxRepositoryType = {
     createBlockchainTx: (blockchainTx: BlockchainTx) => Promise<BlockchainTx>,
-    getBlockchainTx: (txHash: string) => Promise<BlockchainTx | null>,
-    updateBlockchainTx: (txHash: string, blockchainTx: BlockchainTx) => Promise<BlockchainTx>,
+    getByTxHash: (txHash: string) => Promise<BlockchainTx | null>,
+    updateByParams: (txHash: string, params: {
+        txHash?: string;
+        status?: typeof TxStatus[keyof typeof TxStatus];
+        image?: Buffer | undefined;
+        imageMimeType?: string | undefined;
+        walletAddress?: string;
+        userId?: string;
+        timestamp?: Date;
+    }) => Promise<BlockchainTx>,
+    deleteImageForTxHash: (txHash: string) => Promise<BlockchainTx>,
     deleteBlockchainTx: (txHash: string) => Promise<void>,
 }
 
@@ -16,21 +26,49 @@ export const BlockchainTxRepository = (db: BlockchainTxDBModelType): BlockchainT
             throw new Error("BlockchainTx is null");
         }
         const newBlockchainTx = await db.create(blockchainTxDB);
-       return fromDBBlockchainTx(newBlockchainTx)!!;
+        return fromDBBlockchainTx(newBlockchainTx)!!;
     }
 
-    const getBlockchainTx = async (txHash: string) => {
+    const getByTxHash = async (txHash: string) => {
         const blockchainTx = await db.findOne({ txHash });
         return fromDBBlockchainTx(blockchainTx);
     }
 
-    const updateBlockchainTx = async (txHash: string, blockchainTx: BlockchainTx) => {
-        const blockchainTxDB = toDBBlockchainTx(blockchainTx);
-        if (!blockchainTxDB) {
-            throw new Error("BlockchainTx is null");
+    const updateByParams = async (txHash: string, params: {
+        txHash?: string;
+        status?: typeof TxStatus[keyof typeof TxStatus];
+        image?: Buffer | undefined;
+        imageMimeType?: string | undefined;
+        walletAddress?: string;
+        userId?: string;
+        timestamp?: Date;
+    }) => {
+        console.log(`BlockchainTxRepository::updateByParams txHash=${txHash}, params=${JSON.stringify(params)}`);
+        try {
+            const updatedBlockchainTx = await db.findOneAndUpdate(
+                { txHash: txHash },
+                { $set: params },
+                { new: true }
+            );
+            return fromDBBlockchainTx(updatedBlockchainTx)!!;
+        } catch (error) {
+            console.error(`BlockchainTxRepository::updateByParams Error updating blockchainTx: txHash=${txHash}, error=${error}`);
+            throw error;
         }
-        const updatedBlockchainTx = await db.findOneAndUpdate({ txHash: txHash }, blockchainTxDB, { new: true });
-        return fromDBBlockchainTx(updatedBlockchainTx)!!;
+    }
+
+    const deleteImageForTxHash = async (txHash: string) => {
+        console.log(`BlockchainTxRepository::deleteImageForTxHash txHash=${txHash}`);
+        try {
+            const updatedBlockchainTx = await db.findOneAndUpdate(
+                { txHash: txHash },
+                { $unset: { image: "", imageMimeType: "" } }
+            );
+            return fromDBBlockchainTx(updatedBlockchainTx)!!;
+        } catch (error) {
+            console.error(`BlockchainTxRepository::deleteImageForTxHash Error deleting image for txHash=${txHash}, error=${error}`);
+            throw error;
+        }
     }
 
     const deleteBlockchainTx = async (txHash: string) => {
@@ -39,8 +77,9 @@ export const BlockchainTxRepository = (db: BlockchainTxDBModelType): BlockchainT
 
     return {
         createBlockchainTx,
-        getBlockchainTx,
-        updateBlockchainTx,
+        getByTxHash,
+        updateByParams,
+        deleteImageForTxHash,
         deleteBlockchainTx,
     }
 }

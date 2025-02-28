@@ -28,7 +28,7 @@ export const ShowService = (showRepository: ShowRepositoryType,
         if (!authUser) {
             throw new Error("Auth user not found");
         }
-        console.log(`ShowService::createShow txHash=${txHash}, image=${imageBuffer?.length} bytesÇ`);
+        console.log(`ShowService::createShow txHash=${txHash}, image=${imageBuffer?.length} bytes`);
         // Create the pending blockchain transaction entry
         const blockchainTxPromise = blockchainTxRepository.createBlockchainTx({
             txHash: txHash,
