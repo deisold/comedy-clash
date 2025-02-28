@@ -11,7 +11,7 @@ export interface FileUploadJobData {
     txHash: string;
 }
 
-export const NotificationEvent = {
+export const NotificationEventType = {
     SHOW_TX_CONFIRMED: "SHOW_TX_CONFIRMED",
     SHOW_IMAGE_UPLOADED: "SHOW_IMAGE_UPLOADED",
 } as const;
@@ -25,7 +25,7 @@ export interface ShowImageUploadedNotificationData {
 
 export interface NotificationJobData {
     jobId?: number | string;
-    event: typeof NotificationEvent[keyof typeof NotificationEvent];
+    eventType: typeof NotificationEventType[keyof typeof NotificationEventType];
     txHash: string;
     data: ShowCreatedNotificationData | ShowImageUploadedNotificationData;
 }
