@@ -48,10 +48,10 @@ export const ComedyTheaterEventObserver = (
     }
 }
 
-const launchContractTxConfirmationJob = (txHash: string, jobQueue: BullQueue<GenericJobData>) => {
+const launchContractTxConfirmationJob = (txHash: string, contractAddress: string, jobQueue: BullQueue<GenericJobData>) => {
     const jobData: ContractTxConfirmationJobData = {
         txHash: txHash,
-        contractAddress: generateRandomHash(),
+        contractAddress: contractAddress,
         status: TxStatus.CONFIRMED
     };
     // Launch contract tx confirmation job
@@ -103,8 +103,9 @@ export const ComedyTheaterEventMockObserver = (
 
                     // Process each new document
                     for (const data of newPendingDocs) {
-                        console.log(`ComedyTheaterEventMockObserver: New blockchainTxDB data inserted: ${data.txHash}`);
-                        launchContractTxConfirmationJob(data.txHash, jobQueue);
+                        const contractAddress = generateRandomHash();
+                        console.log(`ComedyTheaterEventMockObserver: New blockchainTxDB data inserted: ${data.txHash}, contractAddress=${contractAddress}`);
+                        launchContractTxConfirmationJob(data.txHash, contractAddress, jobQueue);
                         launchFileUploadJob(data.txHash, jobQueue);
                     }
                 }
