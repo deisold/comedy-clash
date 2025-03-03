@@ -47,13 +47,15 @@ export const ShowService = (
                     txHash: showRepo?.txHash ?? "",
                     txStatus: showRepo?.txStatus ?? TxStatus.PENDING,
                     createdAt: showRepo?.createdAt ?? new Date(),
+                    submissionCount: submissionCount ?? 0,
+                    isClosed: isClosed ?? false,
                 });
             } catch (error) {
                 console.error(error);
                 return null;
             }
         },
-        addShow: async ( description: string, days: number, imageUrl: string | null) => {
+        addShow: async (description: string, days: number, imageUrl: string | null) => {
             return new Promise<void>((resolve, reject) => {
                 try {
                     // const tx = await comedyTheaterRepo.addShow(description, days, imageUrl);

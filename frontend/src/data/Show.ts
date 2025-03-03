@@ -8,9 +8,11 @@ export interface Show {
     readonly txHash: string;
     readonly txStatus: typeof TxStatus[keyof typeof TxStatus];
     readonly createdAt: Date;
+    readonly submissionCount: number;
+    readonly closed: boolean;
 }
 
-export function toShow({ id, userId, description, imageUrl, txHash, txStatus, createdAt }: {
+export function toShow({ id, userId, description, imageUrl, txHash, txStatus, createdAt, submissionCount, closed }: {
     id: string;
     userId: string;
     description: string;
@@ -18,6 +20,8 @@ export function toShow({ id, userId, description, imageUrl, txHash, txStatus, cr
     txHash: string;
     txStatus: typeof TxStatus[keyof typeof TxStatus];
     createdAt: Date;
+    submissionCount: number;
+    closed: boolean;
 }): Show {
     return {
         id,
@@ -27,5 +31,7 @@ export function toShow({ id, userId, description, imageUrl, txHash, txStatus, cr
         txHash,
         txStatus,
         createdAt,
+        submissionCount,
+        closed,
     };
 }   
