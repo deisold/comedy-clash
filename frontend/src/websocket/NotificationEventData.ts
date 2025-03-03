@@ -11,8 +11,10 @@ export interface ShowImageUploadedNotificationData {
     showImageUrl: string | null;
 }
 
+export type ShowNotificationDataTypes = ShowCreatedNotificationData | ShowImageUploadedNotificationData;
+
 export interface NotificationEventData {
     eventType: typeof NotificationEventType[keyof typeof NotificationEventType];
     txHash: string;
-    data: ShowCreatedNotificationData | ShowImageUploadedNotificationData;
+    data: ShowNotificationDataTypes;
 }

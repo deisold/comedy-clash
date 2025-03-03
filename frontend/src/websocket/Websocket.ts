@@ -3,7 +3,10 @@ import { NotificationEventData, NotificationEventType } from "./NotificationEven
 export interface WebSocketInstanceType {
     start: () => void;
     stop: () => void;
-    addListener: (eventType: string, callback: (data: NotificationEventData) => void) => () => void;
+    addListener: (
+        eventType: typeof NotificationEventType[keyof typeof NotificationEventType],
+        callback: (data: NotificationEventData) => void
+    ) => () => void;
 }
 
 export const WebSocketInstance = (url: string, maxRetries: number, retryDelayMs: number): WebSocketInstanceType => {
@@ -93,16 +96,16 @@ export const WebSocketInstance = (url: string, maxRetries: number, retryDelayMs:
         }
     };
 
-    const addListener = (eventType: string, callback: (data: NotificationEventData) => void) => {
+    const addListener = (eventType: typeof NotificationEventType[keyof typeof NotificationEventType],
+        callback: (data: NotificationEventData) => void) => {
+        console.log(`WebSocketInstance: Adding listener for event ${eventType}`);
+
         if (!listeners.has(eventType)) {
             listeners.set(eventType, new Set());
         }
 
-        const eventListeners = listeners.get(eventType);
-        if (eventListeners) {
-            console.log(`WebSocketInstance: Adding listener for event ${eventType}`);
-            eventListeners.add(callback);
-        }
+        const eventListeners = listeners.get(eventType)!!;
+        eventListeners.add(callback);
 
         // Return a function to remove this listener
         return () => {
