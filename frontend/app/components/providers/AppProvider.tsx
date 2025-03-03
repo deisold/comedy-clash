@@ -15,6 +15,9 @@ import { ShowApiAdapter } from '../../source/adapters/api/ShowApiAdapter';
 import { ShowRepository, ShowRepositoryType } from '../../source/repositories/ShowRepo';
 import { ShowService, ShowServiceType } from '../../source/service/ShowService';
 import { WebSocketInstance, WebSocketInstanceType } from '../../source/websocket/Websocket';
+import { WsUpdateService } from '@/app/source/service/WsUpdateService';
+import { ShowEventProcessor } from "@/app/source/service/ShowEventProcessor";
+import { useShowStore } from '@/app/source/store/ShowStore';
 //
 interface AppContextType {
     showService: ShowServiceType | null;
@@ -57,6 +60,8 @@ export function AppProvider({ children }: AppProviderProps) {
 
     const useMockData = JSON.parse(process.env.NEXT_PUBLIC_USE_MOCKDATA as string);
     const comedyTheaterAddress = process.env.NEXT_PUBLIC_COMEDY_THEATER_ADDRESS;
+
+    const showStore = useShowStore();
 
     useEffect(() => {
         const init = async () => {
@@ -108,8 +113,14 @@ export function AppProvider({ children }: AppProviderProps) {
                 const protocolWebSocket = useHttps ? 'wss://' : 'ws://';
                 const websocketUrl = `${protocolWebSocket}${websocketHost}:${websocketPort}`;
 
+                // START WebSocket
                 const websocket = WebSocketInstance(websocketUrl, parseInt(websocketMaxRetries), parseInt(websocketRetryDelayMs));
                 websocket.start();
+
+                // START WebSocket Update Service
+                const showEventProcessor = ShowEventProcessor(showStore);
+                const wsUpdateService = WsUpdateService(websocket, showEventProcessor);
+                wsUpdateService.start();
                 //
                 const showApiAdapter = ShowApiAdapter(httpClient);
                 const showRepo = ShowRepository(showApiAdapter);
