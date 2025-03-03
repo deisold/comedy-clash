@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'react-toastify';
 import RetryButton from '../ui/RetryButton';
 import { buttonClassNameListCTA, buttonStyleCTAClassName } from '../ui/styles/buttonClassNames';
+import { useShowStore } from '@/app/source/store/ShowStore';
 //
 interface ShowDetailsState {
     address: string | null;
@@ -21,12 +22,7 @@ export default function ShowListItem({ index }: { index: number }) {
 
     const [loading, setLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
-    const [showDetails, setShowDetails] = useState<ShowDetailsState>({
-        address: null,
-        description: null,
-        isClosed: true,
-        submissionCount: 0,
-    });
+    const { setShowForIndex, getShowForIndex, updateShow } = useShowStore();
     const [isClosing, setIsClosing] = useState(false);
 
     useEffect(() => {
@@ -41,16 +37,7 @@ export default function ShowListItem({ index }: { index: number }) {
                 if (show === null) {
                     throw new Error('Show not found');
                 }
-
-
-                if (controller.signal.aborted) return;
-
-                setShowDetails({
-                    address: show.address,
-                    description: show.description,
-                    isClosed: show.isClosed,
-                    submissionCount: show.submissionCount,
-                });
+                setShowForIndex(index, show);
             } catch (error: any) {
                 if (controller.signal.aborted) return;
 
@@ -70,23 +57,22 @@ export default function ShowListItem({ index }: { index: number }) {
     }, [comedyTheaterRepo, comedyClashRepo, index]);
 
     const handleNavigate = () => {
-        console.log(`showDetails.address:${showDetails.address}`);
+        const show = getShowForIndex(index)!!;
+        console.log(`showDetails.address:${show.id}`);
 
-        router.push(`/showdetails/${showDetails.address}`);
+        router.push(`/showdetails/${show.id}`);
     };
 
     const handleClose = async () => {
-        console.log(`handleClose: address:${showDetails.address}`);
+        const show = getShowForIndex(index)!!;
+        console.log(`handleClose: address:${show.id}`);
         setIsClosing(true);
         try {
-            if (!comedyClashRepo || !showDetails.address) {
+            if (!comedyClashRepo || !show.id) {
                 return;
             }
-            await comedyClashRepo.closeSubmission(showDetails.address);
-            setShowDetails(prevDetails => ({
-                ...prevDetails,
-                isClosed: true
-            }));
+            await comedyClashRepo.closeSubmission(show.id);
+            updateShow(index, {closed: true});
         } catch (error: any) {
             console.error('Error closing show:', error);
             toast.error(error.message || 'Failed to close show');
@@ -95,7 +81,8 @@ export default function ShowListItem({ index }: { index: number }) {
         }
     };
 
-    if (loading) {
+    const show = getShowForIndex(index);
+    if (loading || show === null) {
         return (
             <tr>
                 <td colSpan={4} className="text-center">Loading...</td>
@@ -117,21 +104,21 @@ export default function ShowListItem({ index }: { index: number }) {
     }
 
     return (
-        <tr className={`${showDetails.isClosed ? 'bg-gray-200' : ''}`}>
+        <tr className={`${show!!.closed ? 'bg-gray-200' : ''}`}>
             <td>{index}</td>
-            <td>{showDetails.description}</td>
-            <td>{showDetails.submissionCount}</td>
+            <td>{show!!.description}</td>
+            <td>{show!!.submissionCount}</td>
             <td>
                 <button
-                    className={buttonClassNameListCTA(showDetails.isClosed)}
-                    disabled={showDetails.address == null}
+                    className={buttonClassNameListCTA(show!!.closed)}
+                    disabled={show!!.id == null}
                     onClick={handleNavigate}>
                     Show
                 </button>
-                {!showDetails.isClosed && (
+                {!show!!.closed && (
                     <button
                         className={buttonClassNameListCTA(isClosing)}
-                        disabled={showDetails.address == null || isClosing}
+                        disabled={show!!.id == null || isClosing}
                         onClick={handleClose}>
                         {isClosing ? 'Closing...' : 'Close'}
                     </button>

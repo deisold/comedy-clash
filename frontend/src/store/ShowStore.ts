@@ -12,7 +12,7 @@ export interface ShowStoreType {
     storeShows: (shows: Show[]) => void;
     setShowForIndex: (index: number, show: Show) => void;
     getShowForIndex: (index: number) => Show | null;
-    updateShowAddress: (txHash: string, address: string) => void;
+    updateShow: (index: number, show: Partial<Show>) => void;
 }
 
 export const useShowStore = create<ShowStoreType>((set, get) => ({
@@ -26,7 +26,7 @@ export const useShowStore = create<ShowStoreType>((set, get) => ({
         const showEntry = get().showMapping.find((userMapping) => userMapping.index === index);
         return showEntry ? showEntry.data : null;
     },
-    updateShowAddress: (txHash: string, address: string) => set((state) => ({
-        showMapping: state.showMapping.map((userMapping) => userMapping.address === txHash ? { ...userMapping, address } : userMapping)
+    updateShow: (index: number, show: Partial<Show>) => set((state) => ({
+        showMapping: state.showMapping.map((userMapping) => userMapping.index === index ? { ...userMapping, data: { ...userMapping.data, ...show } } : userMapping)
     })),
 }));
