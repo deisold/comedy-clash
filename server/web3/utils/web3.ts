@@ -1,4 +1,6 @@
-import { ethers, Network, WebSocketProvider, Provider } from "ethers";
+import { ethers } from "ethers";
+import { WebSocketProvider, Provider } from "@ethersproject/providers";
+import type { Network } from "@ethersproject/networks";
 // import type { Provider } from "@ethersproject/providers";
 
 
@@ -26,7 +28,7 @@ export async function initWeb3Provider(): Promise<Provider> {
  * @param {ethers.Provider} provider The provider to get the network from
  * @returns {Promise<Network|null>}
  */
-export async function getNetwork(provider: ethers.Provider): Promise<Network | null> {
+export async function getNetwork(provider: ethers.providers.Provider): Promise<Network | null> {
     if (!provider) return null;
     try {
         return await provider.getNetwork();

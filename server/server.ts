@@ -63,15 +63,15 @@ async function startServer() {
     webSocketServerInstance.start();
 
     // Start ComedyTheaterEventObserver
-    var observer: ComedyTheaterEventObserverType;
+    var comedyTheaterLocalEventObserver: ComedyTheaterEventObserverType;
     if (process.env.USE_MOCK_MODE === 'true') {
       console.log(`Server: 🔄 Starting to observe ComedyTheater events (mock mode)`);
-      observer = comedyTheaterEventMockObserver;
+      comedyTheaterLocalEventObserver = comedyTheaterEventMockObserver;
     } else {
       console.log(`Server: 🔄 Starting to observe ComedyTheater events`);
-      observer = comedyTheaterEventObserver;
+      comedyTheaterLocalEventObserver = comedyTheaterEventObserver;
     }
-    await observer.startObserving();
+    await comedyTheaterLocalEventObserver.startObserving();
 
     jobQueueProcessor.start();
 
@@ -79,8 +79,7 @@ async function startServer() {
     process.on("unhandledRejection", (err: Error) => {
       console.error(`Unhandled Rejection: ${err.message}`);
 
-      comedyTheaterEventObserver.stopObserving();
-      observer.stopObserving();
+      comedyTheaterLocalEventObserver.stopObserving();
 
       // Gracefully close the server
       server.close(async () => {
