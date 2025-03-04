@@ -22,7 +22,7 @@ export default function ShowListItem({ index }: { index: number }) {
 
     const [loading, setLoading] = useState(true);
     const [errorMessage, setErrorMessage] = useState('');
-    const { setShowForIndex, getShowForIndex, updateShow } = useShowStore();
+    const { setShowForIndex, getShowForIndex, updateShowForIndex } = useShowStore();
     const [isClosing, setIsClosing] = useState(false);
 
     useEffect(() => {
@@ -72,7 +72,7 @@ export default function ShowListItem({ index }: { index: number }) {
                 return;
             }
             await comedyClashRepo.closeSubmission(show.id);
-            updateShow(index, {closed: true});
+            updateShowForIndex(index, { closed: true });
         } catch (error: any) {
             console.error('Error closing show:', error);
             toast.error(error.message || 'Failed to close show');

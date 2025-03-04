@@ -8,7 +8,9 @@ interface UserMappingType {
 }
 
 export interface ShowStoreType {
+    showAmount: number;
     showMapping: UserMappingType[];
+    setShowAmount: (amount: number) => void;
     storeShows: (shows: Show[]) => void;
     setShowForIndex: (index: number, show: Show) => void;
     getShowForIndex: (index: number) => Show | null;
@@ -17,7 +19,9 @@ export interface ShowStoreType {
 }
 
 export const useShowStore = create<ShowStoreType>((set, get) => ({
+    showAmount: 0,
     showMapping: [],
+    setShowAmount: (amount: number) => set({ showAmount: amount }),
     storeShows: (shows: Show[]) => set({ showMapping: shows.map((show, index) => ({ index, address: show.id, data: show })) }),
     setShowForIndex: (index: number, show: Show) => set((state) => ({
         showMapping: [...state.showMapping,

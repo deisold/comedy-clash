@@ -4,14 +4,15 @@ import React, { useEffect, useState } from 'react';
 import { useAppContext } from '@/app/components/providers/AppProvider';
 import { useRouter } from 'next/navigation';
 import ShowListItem from '../showlistitem/showlistitem'
+import { useShowStore } from '@/app/source/store/ShowStore';
 
 export default function Home() {
     const { comedyTheaterRepo, isManager } = useAppContext();
     const router = useRouter();
 
     // isManager is true if the user is the manager of the theater (contract) AND can write to the blockchain
-    const [showAmount, setShowAmount] = useState<number>(0);
-
+    const { showAmount, setShowAmount } = useShowStore();
+    
     const handleNavigate = () => {
         router.push('/createShow');
     };
