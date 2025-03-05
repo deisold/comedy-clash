@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 import { useServerContext } from './di/ServerContext.js';
 import { AuthUser } from './store/AuthStore.js';
 //
-const { showRoutes, showService, authStore } = useServerContext;
+const { showRoutes, showRoutesMock, showService, authStore } = useServerContext;
 //
 console.log(`showService: ${showService}, showService.getShow: ${showService.getShow}`);
 const app = express();
@@ -17,9 +17,14 @@ app.get('/', (req: Request, res: Response) => {
   res.json({ message: 'Hello from Comedy Clash backend!' });
 });
 
+const isMockMode = process.env.USE_MOCK_MODE === 'true';
 // Routes
 const routePrefix = '/api';
 app.use(`${routePrefix}/`, showRoutes.bind());
+if (isMockMode) {
+  console.log(`🔄 Mock mode is enabled: adding mock routes to ${routePrefix}/mock`);
+  app.use(`${routePrefix}/mock`, showRoutesMock.bind());
+}
 
 
 // Auth: setup fake user

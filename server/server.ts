@@ -4,14 +4,14 @@ import app from './app.js';
 import { envPath } from './utils/env_paht.js';
 import { v2 as cloudinary } from 'cloudinary';
 import { useServerContext } from './di/ServerContext.js';
-import { ComedyTheaterEventObserverType } from './web3/ComedyTheaterEventObserver.js';
+import { ComedyTheaterEventObserverType, emptyComedyTheaterEventObserver } from './web3/ComedyTheaterEventObserver.js';
 import { WebSocketServerInstance } from './websocket/WebSocketServer.js';
 import fs from 'fs';
 import path from 'path';
 import http from 'http';
 import https, { Server as HttpsServer } from 'https';
 import { WebSocketServer } from 'ws';
-const { comedyTheaterEventObserver, comedyTheaterEventMockObserver, jobQueueProcessor, setWebSocketServerInstance } = useServerContext;
+const { comedyTheaterEventObserver, jobQueueProcessor, setWebSocketServerInstance } = useServerContext;
 //
 dotenv.config({ path: envPath });
 
@@ -64,12 +64,12 @@ async function startServer() {
 
     // Start ComedyTheaterEventObserver
     var comedyTheaterLocalEventObserver: ComedyTheaterEventObserverType;
-    if (process.env.USE_MOCK_MODE === 'true') {
-      console.log(`Server: 🔄 Starting to observe ComedyTheater events (mock mode)`);
-      comedyTheaterLocalEventObserver = comedyTheaterEventMockObserver;
-    } else {
+    if (!process.env.USE_MOCK_MODE || process.env.USE_MOCK_MODE === 'false') {
       console.log(`Server: 🔄 Starting to observe ComedyTheater events`);
       comedyTheaterLocalEventObserver = comedyTheaterEventObserver;
+    } else {
+      console.log(`Server: 🔄 Mock mode is enabled: no ComedyTheater events observer used. Use mock api calls instead!`);
+      comedyTheaterLocalEventObserver = emptyComedyTheaterEventObserver;
     }
     await comedyTheaterLocalEventObserver.startObserving();
 

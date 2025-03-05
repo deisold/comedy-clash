@@ -15,6 +15,15 @@ export type ComedyTheaterEventObserverType = {
     stopObserving: () => void;
 }
 
+export const emptyComedyTheaterEventObserver: ComedyTheaterEventObserverType = {
+    startObserving: async () => {
+        // Empty implementation
+    },
+    stopObserving: () => {
+      // Empty implementation
+    }
+  };
+
 export const ComedyTheaterEventObserver = (
     contractAddress: string,
     getProvider: () => Promise<Provider>,
@@ -141,7 +150,7 @@ export const ComedyTheaterEventObserver = (
     }
 }
 
-const launchContractTxConfirmationJob = (txHash: string, contractAddress: string, jobQueue: BullQueue<GenericJobData>) => {
+export const launchContractTxConfirmationJob = (txHash: string, contractAddress: string, jobQueue: BullQueue<GenericJobData>) => {
     const jobData: ContractTxConfirmationJobData = {
         txHash: txHash,
         contractAddress: contractAddress,
@@ -154,7 +163,7 @@ const launchContractTxConfirmationJob = (txHash: string, contractAddress: string
         data: jobData
     });
 }
-const launchFileUploadJob = (txHash: string, jobQueue: BullQueue<GenericJobData>) => {
+export const launchFileUploadJob = (txHash: string, jobQueue: BullQueue<GenericJobData>) => {
     const fileUploadJobData: FileUploadJobData = {
         txHash: txHash,
     };
@@ -166,6 +175,7 @@ const launchFileUploadJob = (txHash: string, jobQueue: BullQueue<GenericJobData>
     });
 }
 
+// DEPRECATED: use MOCK api calls instead
 export const ComedyTheaterEventMockObserver = (
     blockchainTxDB: BlockchainTxDBModelType, jobQueue: BullQueue<GenericJobData>
 ): ComedyTheaterEventObserverType => {

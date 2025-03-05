@@ -1,5 +1,6 @@
 import express from 'express';
-import { ShowController } from '../controller/showController';
+import { ShowControllerType } from '../controller/showController';
+import { ShowControllerMockType } from '../controller/showControllerMock';
 import multer from 'multer';
 
 // Configure Multer to store file in memory
@@ -9,7 +10,7 @@ export interface ShowRoutesType {
     bind: () => express.Router;
 }
 
-export const ShowRoutes = (showController: ShowController, router: express.Router): ShowRoutesType => {
+export const ShowRoutes = (showController: ShowControllerType, router: express.Router): ShowRoutesType => {
     const bind = () => {
         console.log(`ShowRoutes::getRoutes setting up routes`);
         //
@@ -26,3 +27,16 @@ export const ShowRoutes = (showController: ShowController, router: express.Route
     }
 }
 
+export const ShowRoutesForMock = (showControllerMock: ShowControllerMockType, router: express.Router): ShowRoutesType => {
+    const bind = () => {
+        console.log(`ShowRoutesForMock::getRoutes setting up routes`);
+        //
+        router.post('/shows/:id/confirmtx', showControllerMock.confirmTx);
+        //
+        return router;
+    }
+
+    return {
+        bind,
+    }
+}
