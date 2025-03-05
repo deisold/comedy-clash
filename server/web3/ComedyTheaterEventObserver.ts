@@ -21,6 +21,7 @@ export const ComedyTheaterEventObserver = (
     jobQueue: BullQueue<GenericJobData>
 ): ComedyTheaterEventObserverType => {
     let reconnectAttempts = 0;
+    let stopObservingCalled = false;
     const MAX_RECONNECT_ATTEMPTS = 5;
     const RECONNECT_DELAY = 5000; // 5 seconds
     let ws: WebSocket | null = null;
@@ -32,7 +33,7 @@ export const ComedyTheaterEventObserver = (
             const txHash = event.transactionHash;
             const blockNumber = event.blockNumber;
             console.log(`📩 ComedyTheaterEventObserver: Show created at: ${showAddress} with txHash: ${txHash} at blockNumber: ${blockNumber}`);
-            
+
             launchContractTxConfirmationJob(txHash, showAddress, jobQueue);
             launchFileUploadJob(txHash, jobQueue);
         });
@@ -53,6 +54,7 @@ export const ComedyTheaterEventObserver = (
     }
 
     async function afterWebSocketOpened(provider: Provider) {
+        console.log(`📜 ComedyTheaterEventObserver: After web socket opened`);
         const contractJson = JSON.parse(fs.readFileSync("./web3/utils/ComedyTheater.json", "utf-8"));
         const abi = contractJson.abi; // Extract only the ABI
         contract = new ethers.Contract(contractAddress, abi, provider);
@@ -71,7 +73,8 @@ export const ComedyTheaterEventObserver = (
     }
 
     async function reconnect() {
-        if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+        console.log(`🔄 ComedyTheaterEventObserver: Attempting to reconnect (${reconnectAttempts}/${MAX_RECONNECT_ATTEMPTS})`);
+        if (reconnectAttempts >= MAX_RECONNECT_ATTEMPTS || stopObservingCalled) {
             console.error("❌ ComedyTheaterEventObserver: Max reconnection attempts reached");
             return;
         }
@@ -92,29 +95,41 @@ export const ComedyTheaterEventObserver = (
         console.log(`ComedyTheaterEventObserver: Starting to observe ComedyTheater events (address=${contractAddress})`);
         const provider = await getProvider();
         const network = await provider.getNetwork();
-        console.log('Connected to network:', network.name);
+        console.log('ComedyTheaterEventObserver: Connected to network:', network.name);
 
+        console.log(`ComedyTheaterEventObserver: web socket=ws.readyState=${ws?.readyState}`);
         if (ws === null || ws.readyState !== WebSocket.OPEN) {
+            console.log(`ComedyTheaterEventObserver: Creating web socket`);
             ws = (provider as WebSocketProvider).websocket as unknown as WebSocket;
             await new Promise<void>((resolve) => {
-                ws!.onopen = () => {
-                    console.log("✅ ComedyTheaterEventObserver: WebSocket opened. State:", ws!.readyState);
-                    resolve();
-                };
+                if (ws) {
+                    ws.onopen = () => {
+                        console.log("✅ ComedyTheaterEventObserver: WebSocket opened. State:", ws!.readyState);
+                        resolve();
+                    };
+                    ws.onerror = (error) => {
+                        console.error("❌ ComedyTheaterEventObserver: WebSocket Error during connection:", error);
+                        ws = null;
+                        reconnect();
+                    };
+
+                    ws.onclose = (event) => {
+                        console.log("🔴 ComedyTheaterEventObserver: WebSocket closed. Code:", event.code, "Reason:", event.reason);
+                        ws = null;
+                        reconnect();
+                    };
+                }
             });
             afterWebSocketOpened(provider);
         } else {
             console.log("✅ ComedyTheaterEventObserver: WebSocket already opened. State:", ws.readyState);
             afterWebSocketOpened(provider);
         }
-        ws!.onerror = async (error) => {
-            console.error("❌ ComedyTheaterEventObserver: WebSocket Error:", error);
-            await reconnect();
-        };
     }
 
     function stopObserving() {
         console.log(`🔴 ComedyTheaterEventObserver: Stopping to observe ComedyTheater events`);
+        stopObservingCalled = true;
         contract?.removeAllListeners();
         ws?.close();
         ws = null;
